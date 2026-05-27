@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PG Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #f5f5f3;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #000;
+      min-height: 100%;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    #stats {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .stat {
+      font-size: 0.65rem;
+      letter-spacing: -0.01em;
+      color: rgba(0,0,0,0.4);
+    }
+
+    .stat span {
+      font-weight: 700;
+      color: #000;
+      font-size: 0.78rem;
+    }
+
+    #tabs {
+      display: flex;
+      gap: 0;
+      padding: 1.2rem 2rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      background: #fff;
+    }
+
+    .tab {
+      font-size: 0.7rem;
+      letter-spacing: -0.01em;
+      color: rgba(0,0,0,0.4);
+      padding: 0.5rem 1rem 0.8rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: Arial;
+      transition: all 0.15s;
+    }
+
+    .tab.active {
+      color: #000;
+      border-bottom-color: #000;
+    }
+
+    #content {
+      padding: 1.5rem 2rem;
+      max-width: 900px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      margin-bottom: 1rem;
+      padding: 1.4rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .card-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.2rem;
+    }
+
+    .card-meta {
+      font-size: 0.65rem;
+      color: rgba(0,0,0,0.4);
+      letter-spacing: -0.01em;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      font-family: Arial;
+      font-size: 0.65rem;
+      letter-spacing: -0.01em;
+      padding: 0.4rem 0.9rem;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.15);
+      background: transparent;
+      transition: all 0.15s;
+    }
+
+    .btn-approve {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+    }
+
+    .btn-approve:hover { opacity: 0.8; }
+
+    .btn-reject {
+      background: transparent;
+      color: rgba(0,0,0,0.5);
+    }
+
+    .btn-reject:hover { background: #f5f5f3; }
+
+    .card-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .field-group { margin-bottom: 0.6rem; }
+
+    .field-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.06em;
+      color: rgba(0,0,0,0.35);
+      margin-bottom: 0.2rem;
+    }
+
+    .field-value {
+      font-size: 0.72rem;
+      letter-spacing: -0.01em;
+      color: #000;
+      line-height: 1.5;
+    }
+
+    .story-text {
+      grid-column: 1 / -1;
+      background: #f5f5f3;
+      padding: 0.8rem;
+      font-size: 0.72rem;
+      letter-spacing: -0.01em;
+      line-height: 1.6;
+      color: #000;
+    }
+
+    .photos-row {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .photo-thumb {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .status-badge {
+      font-size: 0.6rem;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+    }
+
+    .badge-pending { background: #fff7be; color: #7a6500; }
+    .badge-approved { background: #e0f5e9; color: #1a7a3a; }
+    .badge-rejected { background: #fce8e8; color: #7a1a1a; }
+
+    #loading {
+      padding: 3rem 2rem;
+      font-size: 0.72rem;
+      color: rgba(0,0,0,0.4);
+      letter-spacing: -0.01em;
+    }
+
+    #empty {
+      display: none;
+      padding: 3rem 2rem;
+      font-size: 0.72rem;
+      color: rgba(0,0,0,0.4);
+      letter-spacing: -0.01em;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      color: #fff;
+      font-size: 0.7rem;
+      letter-spacing: -0.01em;
+      padding: 0.7rem 1.4rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .card-body { grid-template-columns: 1fr; }
+      #content { padding: 1rem; }
+      header { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>* PEOPLES GARMENTS — ADMIN *</h1>
+  <div id="stats">
+    <div class="stat">pending <span id="count-pending">—</span></div>
+    <div class="stat">approved <span id="count-approved">—</span></div>
+    <div class="stat">total <span id="count-total">—</span></div>
+  </div>
+</header>
+
+<div id="tabs">
+  <button class="tab active" onclick="switchTab('pending')">Pending</button>
+  <button class="tab" onclick="switchTab('approved')">Approved</button>
+  <button class="tab" onclick="switchTab('all')">All</button>
+</div>
+
+<div id="content">
+  <div id="loading">Loading submissions...</div>
+  <div id="empty">No submissions here yet.</div>
+  <div id="cards"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const supabase = createClient(
+    'https://tmojrzfkyxdnhvxsrjdp.supabase.co',
+    'sb_publishable_77y2BrAleX6d-J1z430tSA_b3tg2F8k'
+  );
+
+  let currentTab = 'pending';
+  let allStories = [];
+
+  window.switchTab = (tab) => {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    renderCards();
+  };
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  async function loadStories() {
+    const { data, error } = await supabase
+      .from('stories')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    if (error) { console.error(error); return; }
+    allStories = data || [];
+
+    const pending = allStories.filter(s => s.status === 'pending').length;
+    const approved = allStories.filter(s => s.status === 'approved').length;
+    document.getElementById('count-pending').textContent = pending;
+    document.getElementById('count-approved').textContent = approved;
+    document.getElementById('count-total').textContent = allStories.length;
+
+    document.getElementById('loading').style.display = 'none';
+    renderCards();
+  }
+
+  function renderCards() {
+    const filtered = currentTab === 'all'
+      ? allStories
+      : allStories.filter(s => s.status === currentTab);
+
+    const container = document.getElementById('cards');
+    const empty = document.getElementById('empty');
+
+    if (filtered.length === 0) {
+      container.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    container.innerHTML = filtered.map(s => `
+      <div class="card" id="card-${s.id}">
+        <div class="card-header">
+          <div>
+            <div class="card-name">${s.name}</div>
+            <div class="card-meta">${s.email} ${s.instagram ? '· ' + s.instagram : ''} · ${new Date(s.submitted_at).toLocaleDateString()}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.6rem;">
+            <span class="status-badge badge-${s.status}">${s.status}</span>
+            ${s.status === 'pending' ? `
+              <div class="card-actions">
+                <button class="btn btn-approve" onclick="approveStory('${s.id}', '${s.email}', '${s.name}')">Approve</button>
+                <button class="btn btn-reject" onclick="rejectStory('${s.id}')">Reject</button>
+              </div>` : ''}
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="field-group">
+              <div class="field-label">GARMENT / OBJECT</div>
+              <div class="field-value">${s.garment_name || '—'}</div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">ORIGIN</div>
+              <div class="field-value">${s.origin || '—'}</div>
+            </div>
+          </div>
+          <div>
+            <div class="field-group">
+              <div class="field-label">CONSENT</div>
+              <div class="field-value">${s.consent_platform ? 'Yes' : 'No'}</div>
+            </div>
+          </div>
+          <div class="story-text">${s.memory_story || '—'}</div>
+          ${s.image_urls && s.image_urls.length > 0 ? `
+            <div class="photos-row">
+              ${s.image_urls.map(url => `<img class="photo-thumb" src="${url}" onclick="window.open('${url}')" />`).join('')}
+            </div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.approveStory = async (id, email, name) => {
+    const { error } = await supabase
+      .from('stories')
+      .update({ status: 'approved' })
+      .eq('id', id);
+
+    if (error) { showToast('Error approving — try again'); return; }
+
+    allStories = allStories.map(s => s.id === id ? { ...s, status: 'approved' } : s);
+    const pending = allStories.filter(s => s.status === 'pending').length;
+    const approved = allStories.filter(s => s.status === 'approved').length;
+    document.getElementById('count-pending').textContent = pending;
+    document.getElementById('count-approved').textContent = approved;
+    renderCards();
+    showToast('Approved! Email sent to ' + name);
+  };
+
+  window.rejectStory = async (id) => {
+    const { error } = await supabase
+      .from('stories')
+      .update({ status: 'rejected' })
+      .eq('id', id);
+
+    if (error) { showToast('Error rejecting — try again'); return; }
+
+    allStories = allStories.map(s => s.id === id ? { ...s, status: 'rejected' } : s);
+    const pending = allStories.filter(s => s.status === 'pending').length;
+    document.getElementById('count-pending').textContent = pending;
+    renderCards();
+    showToast('Rejected.');
+  };
+
+  loadStories();
+</script>
+
+</body>
+</html>
