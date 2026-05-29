@@ -17,12 +17,11 @@ serve(async (req) => {
   const isNewSubmission = !oldRecord && record.status === "pending";
 
   if (isApproval) {
-    // Email to submitter on approval
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "Peoples Garments <onboarding@resend.dev>",
+        from: "Peoples Garments <hello@peoplesgarments.com>",
         to: record.email,
         subject: "Your story is now live — Peoples Garments",
         html: `<div style="font-family:Arial,Helvetica,sans-serif;background:#fff;padding:2.5rem 2rem;text-align:center;max-width:480px;margin:0 auto;">
@@ -36,12 +35,11 @@ serve(async (req) => {
       }),
     });
   } else if (isNewSubmission) {
-    // Email to submitter confirming receipt
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "Peoples Garments <onboarding@resend.dev>",
+        from: "Peoples Garments <hello@peoplesgarments.com>",
         to: record.email,
         subject: "Thank you for your submission — Peoples Garments",
         html: `<div style="font-family:Arial,Helvetica,sans-serif;background:#fff;padding:2.5rem 2rem;text-align:center;max-width:480px;margin:0 auto;">
@@ -52,12 +50,11 @@ serve(async (req) => {
       }),
     });
 
-    // Email to you with submission details
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "Peoples Garments <onboarding@resend.dev>",
+        from: "Peoples Garments <hello@peoplesgarments.com>",
         to: YOUR_EMAIL,
         subject: "New story submission — Peoples Garments",
         html: `<div style="font-family:Arial,Helvetica,sans-serif;background:#fff;padding:2.5rem 2rem;max-width:480px;margin:0 auto;">
