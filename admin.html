@@ -4,263 +4,501 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PG Admin</title>
-  <link rel="icon" type="image/png" href="favicon.png" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
-      background: #f5f5f3;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #000;
-      min-height: 100%;
+      width: 100%; height: 100%;
+      background: #f7f7f5;
+      color: #111;
+      font-family: Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
-    header {
-      background: #fff;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      padding: 1rem 2rem;
+    /* ── TOP BAR ── */
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    header h1 {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-
-    #stats {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .stat {
-      font-size: 0.65rem;
-      letter-spacing: -0.01em;
-      color: rgba(0,0,0,0.4);
-    }
-
-    .stat span {
-      font-weight: 700;
-      color: #000;
-      font-size: 0.78rem;
-    }
-
-    #tabs {
-      display: flex;
-      gap: 0;
-      padding: 1.2rem 2rem 0;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
+      padding: 1.2rem 2rem;
       background: #fff;
+      color: #111;
+      border-bottom: 1px solid #eee;
+    }
+
+    .topbar-title {
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .topbar-sub {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.4;
+      color: #111;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      background: #fff;
+      padding: 0 2rem;
     }
 
     .tab {
-      font-size: 0.7rem;
-      letter-spacing: -0.01em;
-      color: rgba(0,0,0,0.4);
-      padding: 0.5rem 1rem 0.8rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 1rem 1.5rem;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      border: none;
       background: none;
-      border-top: none;
-      border-left: none;
-      border-right: none;
-      font-family: Arial;
-      transition: all 0.15s;
+      color: #999;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .tab.active {
-      color: #000;
-      border-bottom-color: #000;
+      color: #111;
+      border-bottom-color: #111;
     }
 
-    #content {
-      padding: 1.5rem 2rem;
-      max-width: 900px;
-    }
+    .tab:hover { color: #111; }
 
-    .card {
-      background: #fff;
-      border: 1px solid rgba(0,0,0,0.08);
-      margin-bottom: 1rem;
-      padding: 1.4rem;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .card-name {
-      font-size: 0.82rem;
+    .tab-count {
+      background: #e0e0e0;
+      color: #888;
+      font-size: 0.5rem;
       font-weight: 700;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.2rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 20px;
+      letter-spacing: 0;
     }
 
-    .card-meta {
-      font-size: 0.65rem;
-      color: rgba(0,0,0,0.4);
-      letter-spacing: -0.01em;
+    .tab.active .tab-count { background: #111; color: #fff; }
+    .tab:not(.active) .tab-count { background: #e0e0e0; color: #999; }
+
+    /* ── CONTENT AREA ── */
+    .content {
+      padding: 2rem;
+      max-width: 1100px;
     }
 
-    .card-actions {
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
       display: flex;
-      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
     }
 
-    .btn {
-      font-family: Arial;
-      font-size: 0.65rem;
-      letter-spacing: -0.01em;
-      padding: 0.4rem 0.9rem;
-      cursor: pointer;
-      border: 1px solid rgba(0,0,0,0.15);
-      background: transparent;
-      transition: all 0.15s;
+    .section-title {
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
-    .btn-approve {
-      background: #000;
-      color: #fff;
-      border-color: #000;
+    .section-note {
+      font-size: 0.6rem;
+      color: #888;
+      letter-spacing: 0.03em;
     }
 
-    .btn-approve:hover { opacity: 0.8; }
-
-    .btn-reject {
-      background: transparent;
-      color: rgba(0,0,0,0.5);
-    }
-
-    .btn-reject:hover { background: #f5f5f3; }
-
-    .card-body {
+    /* ── STORY CARD ── */
+    .story-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      padding: 1.4rem;
+      margin-bottom: 1rem;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      grid-template-columns: 100px 1fr auto;
+      gap: 1.2rem;
+      align-items: start;
     }
 
-    .field-group { margin-bottom: 0.6rem; }
+    .story-card img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      display: block;
+      background: #eee;
+    }
 
-    .field-label {
-      font-size: 0.58rem;
-      letter-spacing: 0.06em;
-      color: rgba(0,0,0,0.35);
+    .story-info {}
+
+    .story-handle {
+      font-weight: 700;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       margin-bottom: 0.2rem;
     }
 
-    .field-value {
-      font-size: 0.72rem;
-      letter-spacing: -0.01em;
-      color: #000;
-      line-height: 1.5;
+    .story-meta {
+      font-size: 0.58rem;
+      color: #888;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.6rem;
+      text-transform: uppercase;
     }
 
     .story-text {
-      grid-column: 1 / -1;
-      background: #f5f5f3;
-      padding: 0.8rem;
-      font-size: 0.72rem;
-      letter-spacing: -0.01em;
-      line-height: 1.6;
-      color: #000;
+      font-size: 0.62rem;
+      line-height: 1.7;
+      color: #333;
+      margin-bottom: 0.6rem;
     }
 
-    .photos-row {
-      grid-column: 1 / -1;
+    .story-fields {
       display: flex;
-      gap: 0.5rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
     }
 
-    .photo-thumb {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      cursor: pointer;
+    .story-field {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
     }
+
+    .story-field strong {
+      display: block;
+      color: #111;
+      font-weight: 700;
+      margin-bottom: 0.1rem;
+    }
+
+    /* ── ACTIONS ── */
+    .story-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 90px;
+    }
+
+    .btn-approve {
+      font-family: Arial, sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.8rem;
+      background: #e8e8e8;
+      color: #111;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-approve:hover { opacity: 0.6; }
+
+    .btn-reject {
+      font-family: Arial, sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.8rem;
+      background: #f2f2f2;
+      color: #888;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-reject:hover { opacity: 0.6; }
+
+    .btn-remove {
+      font-family: Arial, sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.8rem;
+      background: #f2f2f2;
+      color: #aaa;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-remove:hover { opacity: 0.6; }
 
     .status-badge {
-      font-size: 0.6rem;
-      letter-spacing: 0.04em;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      background: #e8f5e9;
+      color: #2e7d32;
+      display: inline-block;
+      margin-bottom: 0.5rem;
     }
 
-    .badge-pending { background: #fff7be; color: #7a6500; }
-    .badge-approved { background: #e0f5e9; color: #1a7a3a; }
-    .badge-rejected { background: #fce8e8; color: #7a1a1a; }
-
-    #loading {
-      padding: 3rem 2rem;
-      font-size: 0.72rem;
-      color: rgba(0,0,0,0.4);
-      letter-spacing: -0.01em;
+    /* ── MEMBERS TABLE ── */
+    .members-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #e8e8e8;
     }
 
-    #empty {
-      display: none;
-      padding: 3rem 2rem;
-      font-size: 0.72rem;
-      color: rgba(0,0,0,0.4);
-      letter-spacing: -0.01em;
+    .members-table th {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.9rem 1.2rem;
+      text-align: left;
+      border-bottom: 1px solid #e8e8e8;
+      color: #888;
+      background: #fafafa;
     }
 
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      color: #fff;
-      font-size: 0.7rem;
-      letter-spacing: -0.01em;
-      padding: 0.7rem 1.4rem;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
+    .members-table td {
+      font-size: 0.62rem;
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid #f0f0f0;
+      color: #111;
+      letter-spacing: 0.02em;
     }
 
-    .toast.show { opacity: 1; }
+    .members-table tr:last-child td { border-bottom: none; }
+    .members-table tr:hover td { background: #fafafa; }
 
-    @media (max-width: 600px) {
-      .card-body { grid-template-columns: 1fr; }
-      #content { padding: 1rem; }
-      header { padding: 1rem; }
+    .member-type {
+      font-size: 0.48rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      display: inline-block;
     }
+
+    .member-type.newsletter { background: #e8f0ff; color: #1a4db3; }
+    .member-type.member { background: #f0f0f0; color: #444; }
+    .member-type.submitter { background: #fff3e0; color: #c96a00; }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #bbb;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px dashed #ddd;
+      background: #fff;
+    }
+
+    /* ── SEARCH BAR ── */
+    .search-bar {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      font-family: Arial, sans-serif;
+      font-size: 0.65rem;
+      padding: 0.6rem 0.9rem;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #111;
+      width: 260px;
+      outline: none;
+      letter-spacing: 0.02em;
+    }
+
+    .search-input:focus { border-color: #111; }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>* PEOPLES GARMENTS — ADMIN *</h1>
-  <div id="stats">
-    <div class="stat">pending <span id="count-pending">—</span></div>
-    <div class="stat">approved <span id="count-approved">—</span></div>
-    <div class="stat">total <span id="count-total">—</span></div>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">People's Garments — Admin</div>
+      <div class="topbar-sub">peoplesgarments@gmail.com</div>
+    </div>
+    <div class="topbar-sub">Private access only</div>
   </div>
-</header>
 
-<div id="tabs">
-  <button class="tab active" onclick="switchTab('pending')">Pending</button>
-  <button class="tab" onclick="switchTab('approved')">Approved</button>
-  <button class="tab" onclick="switchTab('all')">All</button>
-</div>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('pending')">
+      Pending <span class="tab-count" id="count-pending">2</span>
+    </button>
+    <button class="tab" onclick="switchTab('approved')">
+      Approved <span class="tab-count" id="count-approved">5</span>
+    </button>
+    <button class="tab" onclick="switchTab('members')">
+      Members <span class="tab-count" id="count-members">3</span>
+    </button>
+  </div>
 
-<div id="content">
-  <div id="loading">Loading submissions...</div>
-  <div id="empty">No submissions here yet.</div>
-  <div id="cards"></div>
-</div>
+  <!-- CONTENT -->
+  <div class="content">
 
-<div class="toast" id="toast"></div>
+    <!-- PENDING TAB -->
+    <div class="tab-panel active" id="panel-pending">
+      <div class="section-header">
+        <div class="section-title">Pending Approval</div>
+        <div class="section-note">Review and approve before stories go live</div>
+      </div>
+
+      <div class="story-card" id="pending-1">
+        <img src="husna.jpg" alt=""/>
+        <div class="story-info">
+          <div class="story-handle">@HUUSSNNAAA</div>
+          <div class="story-meta">Husna Nashnoush · husna@email.com · Submitted May 24, 2026</div>
+          <div class="story-text">The beadedness of the bag feels like an ode to my Afghan diasporic experience, not because it's from Afghanistan, but because it represents a culture that is mine, yet one I've only ever known from a distance.</div>
+          <div class="story-fields">
+            <div class="story-field"><strong>Object</strong>Beaded Bag</div>
+            <div class="story-field"><strong>Origin</strong>Birthday gift</div>
+            <div class="story-field"><strong>Category</strong>Bags</div>
+            <div class="story-field"><strong>IG Consent</strong>Yes</div>
+          </div>
+        </div>
+        <div class="story-actions">
+          <button class="btn-approve" onclick="approveStory('pending-1')">Approve</button>
+          <button class="btn-reject" onclick="rejectStory('pending-1')">Reject</button>
+        </div>
+      </div>
+
+      <div class="story-card" id="pending-2">
+        <img src="fatoumata.jpg" alt=""/>
+        <div class="story-info">
+          <div class="story-handle">@FATOUMATA</div>
+          <div class="story-meta">Fatoumata Kaba · fatoumata@email.com · Submitted May 24, 2026</div>
+          <div class="story-text">Objects that travel with me and remind me of where I come from. My bag and sandals have been everywhere with me.</div>
+          <div class="story-fields">
+            <div class="story-field"><strong>Object</strong>Bag & Sandals</div>
+            <div class="story-field"><strong>Origin</strong>Guinea</div>
+            <div class="story-field"><strong>Category</strong>Bags</div>
+            <div class="story-field"><strong>IG Consent</strong>Yes</div>
+          </div>
+        </div>
+        <div class="story-actions">
+          <button class="btn-approve" onclick="approveStory('pending-2')">Approve</button>
+          <button class="btn-reject" onclick="rejectStory('pending-2')">Reject</button>
+        </div>
+      </div>
+
+      <div class="empty" id="pending-empty" style="display:none">
+        No pending submissions
+      </div>
+    </div>
+
+    <!-- APPROVED TAB -->
+    <div class="tab-panel" id="panel-approved">
+      <div class="section-header">
+        <div class="section-title">Approved Stories</div>
+        <div class="section-note">Live on the archive</div>
+      </div>
+
+      <div class="story-card" id="approved-1">
+        <img src="mariamalulah_bowl.jpg" alt=""/>
+        <div class="story-info">
+          <div class="status-badge">Live</div>
+          <div class="story-handle">@MARIAMALULAH</div>
+          <div class="story-meta">Mariam · mbalde@email.com · Approved May 20, 2026</div>
+          <div class="story-text">My mom always used these bowls as decor all around our house. When I moved to nyc I took them without knowing and now use them for floral arrangements.</div>
+          <div class="story-fields">
+            <div class="story-field"><strong>Object</strong>Small Bowls</div>
+            <div class="story-field"><strong>Origin</strong>Guinea</div>
+            <div class="story-field"><strong>Category</strong>Pots</div>
+          </div>
+        </div>
+        <div class="story-actions">
+          <button class="btn-remove" onclick="removeStory('approved-1')">Remove</button>
+        </div>
+      </div>
+
+      <div class="story-card" id="approved-2">
+        <img src="aissatoubalde.jpg" alt=""/>
+        <div class="story-info">
+          <div class="status-badge">Live</div>
+          <div class="story-handle">@AISSATOUBALDE_</div>
+          <div class="story-meta">Aissata · aissata@email.com · Approved May 21, 2026</div>
+          <div class="story-text">Panicking the night before Eid, remembering my mom has all these beautiful bazin two piece outfits she doesn't wear anymore. It's my favorite memory.</div>
+          <div class="story-fields">
+            <div class="story-field"><strong>Object</strong>Mother's Bazin</div>
+            <div class="story-field"><strong>Origin</strong>Guinea</div>
+            <div class="story-field"><strong>Category</strong>Scarves</div>
+          </div>
+        </div>
+        <div class="story-actions">
+          <button class="btn-remove" onclick="removeStory('approved-2')">Remove</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MEMBERS TAB -->
+    <div class="tab-panel" id="panel-members">
+      <div class="section-header">
+        <div class="section-title">Members & Subscribers</div>
+        <div class="section-note">Everyone who has joined or signed up for updates</div>
+      </div>
+
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="Search by name or email..." oninput="filterMembers(this.value)"/>
+      </div>
+
+      <table class="members-table" id="members-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Instagram</th>
+            <th>Type</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="members-body">
+          <tr>
+            <td>Mariam Balde</td>
+            <td>mbalde@email.com</td>
+            <td>@mariamalulah</td>
+            <td><span class="member-type submitter">Submitter</span></td>
+            <td>May 20, 2026</td>
+          </tr>
+          <tr>
+            <td>Husna Nashnoush</td>
+            <td>husna@email.com</td>
+            <td>@huussnnaaa</td>
+            <td><span class="member-type member">Member</span></td>
+            <td>May 22, 2026</td>
+          </tr>
+          <tr>
+            <td>Anonymous</td>
+            <td>hello@example.com</td>
+            <td>—</td>
+            <td><span class="member-type newsletter">Newsletter</span></td>
+            <td>May 23, 2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -270,134 +508,160 @@
     'sb_publishable_77y2BrAleX6d-J1z430tSA_b3tg2F8k'
   );
 
-  let currentTab = 'pending';
   let allStories = [];
+  let allMembers = [];
 
+  // ── TAB SWITCHING ──
   window.switchTab = (tab) => {
-    currentTab = tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-    renderCards();
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+    document.getElementById(`panel-${tab}`).classList.add('active');
   };
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+  // ── LOAD DATA ──
+  async function loadAll() {
+    const [{ data: stories }, { data: members }] = await Promise.all([
+      supabase.from('stories').select('*').order('submitted_at', { ascending: false }),
+      supabase.from('members').select('*').order('joined_at', { ascending: false })
+    ]);
+
+    allStories = stories || [];
+    allMembers = members || [];
+
+    renderPending();
+    renderApproved();
+    renderMembers();
+    updateCounts();
   }
 
-  async function loadStories() {
-    const { data, error } = await supabase
-      .from('stories')
-      .select('*')
-      .order('submitted_at', { ascending: false });
-
-    if (error) { console.error(error); return; }
-    allStories = data || [];
-
+  function updateCounts() {
     const pending = allStories.filter(s => s.status === 'pending').length;
     const approved = allStories.filter(s => s.status === 'approved').length;
     document.getElementById('count-pending').textContent = pending;
     document.getElementById('count-approved').textContent = approved;
-    document.getElementById('count-total').textContent = allStories.length;
-
-    document.getElementById('loading').style.display = 'none';
-    renderCards();
+    document.getElementById('count-members').textContent = allMembers.length;
   }
 
-  function renderCards() {
-    const filtered = currentTab === 'all'
-      ? allStories
-      : allStories.filter(s => s.status === currentTab);
+  // ── RENDER PENDING ──
+  function renderPending() {
+    const container = document.getElementById('panel-pending');
+    const pending = allStories.filter(s => s.status === 'pending');
+    const header = container.querySelector('.section-header');
+    const empty = container.querySelector('.empty');
 
-    const container = document.getElementById('cards');
-    const empty = document.getElementById('empty');
+    container.querySelectorAll('.story-card').forEach(c => c.remove());
 
-    if (filtered.length === 0) {
-      container.innerHTML = '';
+    if (pending.length === 0) {
       empty.style.display = 'block';
       return;
     }
-
     empty.style.display = 'none';
-    container.innerHTML = filtered.map(s => `
-      <div class="card" id="card-${s.id}">
-        <div class="card-header">
-          <div>
-            <div class="card-name">${s.name}</div>
-            <div class="card-meta">${s.email} ${s.instagram ? '· ' + s.instagram : ''} · ${new Date(s.submitted_at).toLocaleDateString()}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.6rem;">
-            <span class="status-badge badge-${s.status}">${s.status}</span>
-            ${s.status === 'pending' ? `
-              <div class="card-actions">
-                <button class="btn btn-approve" onclick="approveStory('${s.id}', '${s.email}', '${s.name}')">Approve</button>
-                <button class="btn btn-reject" onclick="rejectStory('${s.id}')">Reject</button>
-              </div>` : ''}
-          </div>
-        </div>
-        <div class="card-body">
-          <div>
-            <div class="field-group">
-              <div class="field-label">GARMENT / OBJECT</div>
-              <div class="field-value">${s.garment_name || '—'}</div>
-            </div>
-            <div class="field-group">
-              <div class="field-label">ORIGIN</div>
-              <div class="field-value">${s.origin || '—'}</div>
-            </div>
-          </div>
-          <div>
-            <div class="field-group">
-              <div class="field-label">CONSENT</div>
-              <div class="field-value">${s.consent_platform ? 'Yes' : 'No'}</div>
-            </div>
-          </div>
-          <div class="story-text">${s.memory_story || '—'}</div>
-          ${s.image_urls && s.image_urls.length > 0 ? `
-            <div class="photos-row">
-              ${s.image_urls.map(url => `<img class="photo-thumb" src="${url}" onclick="window.open('${url}')" />`).join('')}
-            </div>` : ''}
-        </div>
-      </div>
-    `).join('');
+
+    pending.forEach(s => {
+      const card = buildCard(s, 'pending');
+      container.insertBefore(card, empty);
+    });
   }
 
-  window.approveStory = async (id, email, name) => {
-    const { error } = await supabase
-      .from('stories')
-      .update({ status: 'approved' })
-      .eq('id', id);
+  // ── RENDER APPROVED ──
+  function renderApproved() {
+    const container = document.getElementById('panel-approved');
+    const approved = allStories.filter(s => s.status === 'approved');
+    const header = container.querySelector('.section-header');
 
-    if (error) { showToast('Error approving — try again'); return; }
+    container.querySelectorAll('.story-card').forEach(c => c.remove());
 
+    approved.forEach(s => {
+      const card = buildCard(s, 'approved');
+      container.appendChild(card);
+    });
+  }
+
+  // ── BUILD CARD ──
+  function buildCard(s, type) {
+    const div = document.createElement('div');
+    div.className = 'story-card';
+    div.id = `card-${s.id}`;
+
+    const imgSrc = s.image_urls && s.image_urls.length > 0 ? s.image_urls[0] : '';
+    const date = new Date(s.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    div.innerHTML = `
+      <img src="${imgSrc}" alt="" style="${!imgSrc ? 'background:#eee;' : ''}"/>
+      <div class="story-info">
+        ${type === 'approved' ? '<div class="status-badge">Live</div>' : ''}
+        <div class="story-handle">${s.instagram ? '@' + s.instagram.replace('@','') : s.name.toUpperCase()}</div>
+        <div class="story-meta">${s.name} · ${s.email} · ${type === 'approved' ? 'Approved' : 'Submitted'} ${date}</div>
+        <div class="story-text">${s.memory_story || '—'}</div>
+        <div class="story-fields">
+          <div class="story-field"><strong>Object</strong>${s.garment_name || '—'}</div>
+          <div class="story-field"><strong>Origin</strong>${s.origin || '—'}</div>
+          <div class="story-field"><strong>Consent</strong>${s.consent_platform ? 'Yes' : 'No'}</div>
+        </div>
+      </div>
+      <div class="story-actions">
+        ${type === 'pending' ? `
+          <button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
+          <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>
+        ` : `
+          <button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>
+        `}
+      </div>
+    `;
+    return div;
+  }
+
+  // ── RENDER MEMBERS ──
+  function renderMembers(filter = '') {
+    const tbody = document.getElementById('members-body');
+    const filtered = allMembers.filter(m =>
+      (m.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+      (m.name || '').toLowerCase().includes(filter.toLowerCase())
+    );
+
+    tbody.innerHTML = filtered.map(m => {
+      const date = new Date(m.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `<tr>
+        <td>${m.name || '—'}</td>
+        <td>${m.email}</td>
+        <td>${m.instagram ? '@' + m.instagram.replace('@','') : '—'}</td>
+        <td><span class="member-type newsletter">Newsletter</span></td>
+        <td>${date}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  window.filterMembers = (query) => renderMembers(query);
+
+  // ── APPROVE ──
+  window.approveStory = async (id, name, email) => {
+    if (!confirm('Approve this story? It will go live on the archive.')) return;
+    const { error } = await supabase.from('stories').update({ status: 'approved' }).eq('id', id);
+    if (error) { alert('Error approving. Try again.'); return; }
     allStories = allStories.map(s => s.id === id ? { ...s, status: 'approved' } : s);
-    const pending = allStories.filter(s => s.status === 'pending').length;
-    const approved = allStories.filter(s => s.status === 'approved').length;
-    document.getElementById('count-pending').textContent = pending;
-    document.getElementById('count-approved').textContent = approved;
-    renderCards();
-    showToast('Approved! Email sent to ' + name);
+    renderPending(); renderApproved(); updateCounts();
   };
 
+  // ── REJECT ──
   window.rejectStory = async (id) => {
-    const { error } = await supabase
-      .from('stories')
-      .update({ status: 'rejected' })
-      .eq('id', id);
-
-    if (error) { showToast('Error rejecting — try again'); return; }
-
+    if (!confirm('Reject and delete this submission?')) return;
+    const { error } = await supabase.from('stories').update({ status: 'rejected' }).eq('id', id);
+    if (error) { alert('Error rejecting. Try again.'); return; }
     allStories = allStories.map(s => s.id === id ? { ...s, status: 'rejected' } : s);
-    const pending = allStories.filter(s => s.status === 'pending').length;
-    document.getElementById('count-pending').textContent = pending;
-    renderCards();
-    showToast('Rejected.');
+    renderPending(); updateCounts();
   };
 
-  loadStories();
-</script>
+  // ── REMOVE ──
+  window.removeStory = async (id) => {
+    if (!confirm('Remove this story from the archive?')) return;
+    const { error } = await supabase.from('stories').update({ status: 'rejected' }).eq('id', id);
+    if (error) { alert('Error removing. Try again.'); return; }
+    allStories = allStories.map(s => s.id === id ? { ...s, status: 'rejected' } : s);
+    renderApproved(); updateCounts();
+  };
 
+  loadAll();
+</script>
 </body>
 </html>
