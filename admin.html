@@ -192,6 +192,75 @@
       min-width: 90px;
     }
 
+    .order-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      padding: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .order-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .order-name {
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #111;
+    }
+
+    .order-date {
+      font-size: 0.58rem;
+      color: #888;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .order-email {
+      font-size: 0.6rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .order-fields {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+
+    .order-field {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+    }
+
+    .order-field strong {
+      display: block;
+      color: #111;
+      font-weight: 700;
+      margin-bottom: 0.1rem;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.68rem;
+    }
+
+    .order-comments {
+      font-size: 0.62rem;
+      line-height: 1.6;
+      color: #333;
+      border-top: 1px solid #eee;
+      padding-top: 0.6rem;
+    }
+
     .btn-approve {
       font-family: Arial, sans-serif;
       font-size: 0.55rem;
@@ -513,22 +582,7 @@
         <input class="search-input" type="text" placeholder="Search by name or email..." oninput="filterOrders(this.value)"/>
       </div>
 
-      <table class="members-table" id="orders-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Drink</th>
-            <th>Size</th>
-            <th>Milk</th>
-            <th>Sweetness</th>
-            <th>Level</th>
-            <th>Comments</th>
-            <th>Ordered</th>
-          </tr>
-        </thead>
-        <tbody id="orders-body"></tbody>
-      </table>
+      <div id="orders-list"></div>
 
       <div class="empty" id="orders-empty" style="display:none">
         No orders yet
@@ -678,7 +732,7 @@
 
   // ── RENDER ORDERS ──
   function renderOrders(filter = '') {
-    const tbody = document.getElementById('orders-body');
+    const list = document.getElementById('orders-list');
     const empty = document.getElementById('orders-empty');
     const filtered = allOrders.filter(o =>
       (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
@@ -686,25 +740,29 @@
     );
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '';
+      list.innerHTML = '';
       empty.style.display = 'block';
       return;
     }
     empty.style.display = 'none';
 
-    tbody.innerHTML = filtered.map(o => {
+    list.innerHTML = filtered.map(o => {
       const date = new Date(o.ordered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      return `<tr>
-        <td>${o.name || '—'}</td>
-        <td>${o.email || '—'}</td>
-        <td>${o.drink || '—'}</td>
-        <td>${o.size || '—'}</td>
-        <td>${o.milk_preference || '—'}</td>
-        <td>${o.sweetness || '—'}</td>
-        <td>${o.sweetness_level || '—'}</td>
-        <td>${o.comments || '—'}</td>
-        <td>${date}</td>
-      </tr>`;
+      return `<div class="order-card">
+        <div class="order-card-top">
+          <div class="order-name">${o.name || '—'}</div>
+          <div class="order-date">${date}</div>
+        </div>
+        <div class="order-email">${o.email || '—'}</div>
+        <div class="order-fields">
+          <div class="order-field"><strong>${o.drink || '—'}</strong>Drink</div>
+          <div class="order-field"><strong>${o.size || '—'}</strong>Size</div>
+          <div class="order-field"><strong>${o.milk_preference || '—'}</strong>Milk</div>
+          <div class="order-field"><strong>${o.sweetness || '—'}</strong>Sweetness</div>
+          <div class="order-field"><strong>${o.sweetness_level || '—'}</strong>Level</div>
+        </div>
+        ${o.comments ? `<div class="order-comments">${o.comments}</div>` : ''}
+      </div>`;
     }).join('');
   }
 
