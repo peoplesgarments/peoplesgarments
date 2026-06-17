@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>THE PEOPLES CAFE — PEOPLES GARMENTS</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #f00043;
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: -0.05em;
+    }
+
+    /* ── TOP ROW ── */
+    #top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.4rem 0;
+    }
+
+    #home-link {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #fff5c8;
+      text-decoration: none;
+    }
+    #home-link:hover { text-decoration: underline; }
+
+    #ig-link svg { width: 20px; height: 20px; fill: #fff5c8; }
+
+    .spin-asterisk {
+      display: block;
+      width: 40px;
+      height: auto;
+      margin: 0 0 1rem 0;
+      animation: spin 7s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── MAIN ── */
+    main {
+      background: #f00043;
+      color: #fff5c8;
+      padding: 2.2rem 1.4rem 5rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .asterisk-icon {
+      display: inline-block;
+      width: 14px; height: 14px;
+      background-color: #fff5c8;
+      -webkit-mask: url('favicon.png') no-repeat center / contain;
+      mask: url('favicon.png') no-repeat center / contain;
+      vertical-align: middle;
+      margin-left: 0.4rem;
+    }
+
+    .page-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      text-align: left;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-sub {
+      font-size: 0.7rem;
+      letter-spacing: -0.01em;
+      text-align: left;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 2.4rem;
+      line-height: 1.5;
+      max-width: 420px;
+    }
+
+    .section-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 0.8rem;
+    }
+
+    /* ── DRINK OPTIONS ── */
+    .drink-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 1rem 0;
+      cursor: pointer;
+    }
+
+    .drink-option input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid rgba(255,245,200,0.55);
+      border-radius: 50%;
+      background: transparent;
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .drink-option input[type="radio"]:checked {
+      border-color: #fff5c8;
+    }
+    .drink-option input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #fff5c8;
+      transform: translate(-50%, -50%);
+    }
+
+    .drink-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .drink-desc {
+      font-size: 0.66rem;
+      letter-spacing: -0.01em;
+      opacity: 0.85;
+      margin-top: 0.3rem;
+      line-height: 1.5;
+    }
+
+    /* ── CUSTOMIZE BLOCK ── */
+    #customize-block {
+      margin-top: 1.6rem;
+      padding-top: 0.6rem;
+    }
+
+    .choice-group { margin-bottom: 1.4rem; }
+
+    .choice-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+      margin-bottom: 0.6rem;
+    }
+
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .choice-pill {
+      border-radius: 999px;
+      background: rgba(255,245,200,0.12);
+      padding: 0.5rem 1.1rem;
+      font-size: 0.62rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .choice-pill input { display: none; }
+    .choice-pill.selected { background: #fff5c8; color: #f00043; font-weight: 700; }
+
+    /* ── ORDER INFO ── */
+    #order-info {
+      margin-top: 2.2rem;
+      padding-top: 2.2rem;
+      border-top: 1px solid rgba(255,245,200,0.3);
+    }
+
+    .field {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(255,245,200,0.45);
+      color: #fff5c8;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: -0.03em;
+      padding: 0.7rem 0;
+      margin-bottom: 1.3rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field::placeholder { color: rgba(255,245,200,0.5); }
+    .field:focus { border-color: #fff5c8; }
+
+    .field-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ── SUBMIT ── */
+    #submit-btn {
+      width: 100%;
+      margin-top: 1rem;
+      background: rgba(0,0,0,0.12);
+      color: rgba(0,0,0,0.45);
+      border: none;
+      padding: 0.95rem;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      cursor: pointer;
+      border-radius: 999px;
+      transition: opacity 0.2s;
+    }
+    #submit-btn:hover { opacity: 0.85; }
+    #submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── THANK YOU OVERLAY ── */
+    #thankyou {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    #thankyou.active { display: flex; }
+
+    .ty-box {
+      background: #fff5c8;
+      color: #f00043;
+      max-width: 380px;
+      width: 100%;
+      padding: 2.6rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .ty-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .ty-sub {
+      font-size: 0.7rem;
+      line-height: 1.6;
+      letter-spacing: -0.01em;
+    }
+
+    .ty-close {
+      margin-top: 1.8rem;
+      background: none;
+      border: 1px solid #f00043;
+      color: #f00043;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.6rem 1.4rem;
+      cursor: pointer;
+      border-radius: 999px;
+    }
+    .ty-close:hover { opacity: 0.7; }
+
+    @media (max-width: 600px) {
+      .page-title { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP ROW -->
+<div id="top-row">
+  <a id="home-link" href="index.html">HOME</a>
+  <a id="ig-link" href="https://www.instagram.com/peoplesgarments/" target="_blank" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+  </a>
+</div>
+
+<!-- MAIN -->
+<main>
+  <img class="spin-asterisk" src="asterisk-butter.png" alt="" />
+  <div class="page-title">THE PEOPLES CAFE<span class="asterisk-icon"></span></div>
+  <p class="page-sub">We're happy to have you at our cafe! Finish your order by adding your email to join the community.</p>
+
+  <label class="drink-option" data-matcha="true">
+    <input type="radio" name="drink" value="Founder's Favorite" />
+    <div>
+      <span class="drink-name">Founder's Favorite</span>
+      <div class="drink-desc">Iced maple matcha + a hint of vanilla + milk of your choice</div>
+    </div>
+  </label>
+
+  <label class="drink-option" data-matcha="true">
+    <input type="radio" name="drink" value="She's A Sweet One" />
+    <div>
+      <span class="drink-name">She's A Sweet One</span>
+      <div class="drink-desc">Iced matcha + vanilla cream top</div>
+    </div>
+  </label>
+
+  <label class="drink-option" data-matcha="true">
+    <input type="radio" name="drink" value="Fruity Booty" />
+    <div>
+      <span class="drink-name">Fruity Booty</span>
+      <div class="drink-desc">Iced matcha + strawberry cream top</div>
+    </div>
+  </label>
+
+  <label class="drink-option" data-matcha="false">
+    <input type="radio" name="drink" value="Bissap" />
+    <div>
+      <span class="drink-name">Bissap</span>
+      <div class="drink-desc">Hibiscus refresher + a hint of pineapple</div>
+    </div>
+  </label>
+
+  <!-- CUSTOMIZE BLOCK (matcha drinks only) -->
+  <div id="customize-block">
+
+    <div class="choice-group">
+      <div class="choice-label">Size</div>
+      <div class="choice-row" data-group="size">
+        <label class="choice-pill"><input type="radio" name="size" value="12 oz" />12 oz</label>
+        <label class="choice-pill" id="pill-16oz"><input type="radio" name="size" value="16 oz" />16 oz</label>
+      </div>
+    </div>
+
+    <div class="choice-group" id="group-milk">
+      <div class="choice-label">Milk preference</div>
+      <div class="choice-row" data-group="milk">
+        <label class="choice-pill"><input type="radio" name="milk" value="Oat" />Oat</label>
+        <label class="choice-pill"><input type="radio" name="milk" value="Whole" />Whole</label>
+      </div>
+    </div>
+
+    <div class="choice-group" id="group-sweetness-flavor">
+      <div class="choice-label">Sweetness</div>
+      <div class="choice-row" data-group="sweetness">
+        <label class="choice-pill"><input type="radio" name="sweetness" value="Agave" />Agave</label>
+        <label class="choice-pill"><input type="radio" name="sweetness" value="Maple" />Maple</label>
+        <label class="choice-pill"><input type="radio" name="sweetness" value="Vanilla" />Vanilla</label>
+      </div>
+    </div>
+
+    <div class="choice-group" id="group-sweetness-level">
+      <div class="choice-label">Sweetness level</div>
+      <div class="choice-row" data-group="sweetness_level">
+        <label class="choice-pill"><input type="radio" name="sweetness_level" value="Extra Sweet" />Extra sweet</label>
+        <label class="choice-pill"><input type="radio" name="sweetness_level" value="Regular Sweet" />Regular sweet</label>
+        <label class="choice-pill"><input type="radio" name="sweetness_level" value="Light Sweet" />Light sweet</label>
+        <label class="choice-pill"><input type="radio" name="sweetness_level" value="No Sugar At All" />No sugar at all</label>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ORDER INFO -->
+  <div id="order-info">
+    <div class="field-label">Name</div>
+    <input class="field" id="order-name" type="text" placeholder="name" />
+
+    <div class="field-label">Comments</div>
+    <textarea class="field" id="order-comments" placeholder="anything else we should know?" style="height:60px;"></textarea>
+
+    <div class="field-label">Email<span class="asterisk-icon"></span></div>
+    <input class="field" id="order-email" type="email" placeholder="email address" />
+
+    <button id="submit-btn" onclick="submitOrder()">Submit order</button>
+  </div>
+</main>
+
+<!-- THANK YOU -->
+<div id="thankyou">
+  <div class="ty-box">
+    <div class="ty-title">* THE PEOPLES CAFE *</div>
+    <div class="ty-sub">Thank you for your order! We'll have it ready for you shortly.</div>
+    <button class="ty-close" onclick="closeThankyou()">close</button>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const SUPABASE_URL      = 'https://tmojrzfkyxdnhvxsrjdp.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_77y2BrAleX6d-J1z430tSA_b3tg2F8k';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── DRINK SELECTION ──
+  const drinkOptions = document.querySelectorAll('.drink-option');
+  const sweetnessFlavorGroup = document.getElementById('group-sweetness-flavor');
+  const milkGroup = document.getElementById('group-milk');
+  const sweetnessLevelGroup = document.getElementById('group-sweetness-level');
+  const pill16oz = document.getElementById('pill-16oz');
+
+  function clearGroup(group) {
+    group.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    group.querySelectorAll('.choice-pill').forEach(p => p.classList.remove('selected'));
+  }
+
+  drinkOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      drinkOptions.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      const radio = opt.querySelector('input[type="radio"]');
+      const isFoundersFavorite = radio.value === "Founder's Favorite";
+      const isBissap = radio.value === 'Bissap';
+
+      sweetnessFlavorGroup.style.display = (isFoundersFavorite || isBissap) ? 'none' : 'block';
+      milkGroup.style.display = isBissap ? 'none' : 'block';
+      sweetnessLevelGroup.style.display = isBissap ? 'none' : 'block';
+      pill16oz.style.display = isBissap ? 'none' : 'block';
+
+      if (isFoundersFavorite || isBissap) clearGroup(sweetnessFlavorGroup);
+      if (isBissap) {
+        clearGroup(milkGroup);
+        clearGroup(sweetnessLevelGroup);
+        if (pill16oz.querySelector('input').checked) {
+          pill16oz.classList.remove('selected');
+          pill16oz.querySelector('input').checked = false;
+        }
+      }
+    });
+  });
+
+  // ── PILL SELECTION ──
+  document.querySelectorAll('.choice-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const group = pill.closest('.choice-row');
+      group.querySelectorAll('.choice-pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+      pill.querySelector('input').checked = true;
+    });
+  });
+
+  function getSelectedValue(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : null;
+  }
+
+  window.closeThankyou = () => {
+    document.getElementById('thankyou').classList.remove('active');
+    location.reload();
+  };
+
+  window.submitOrder = async () => {
+    const drink = getSelectedValue('drink');
+    const name = document.getElementById('order-name').value.trim();
+    const email = document.getElementById('order-email').value.trim();
+    const comments = document.getElementById('order-comments').value.trim();
+
+    if (!drink) { alert('Please select a drink.'); return; }
+    if (!name) { alert('Please enter your name.'); return; }
+    if (!email) { alert('Please enter your email.'); return; }
+
+    const isMatcha = document.querySelector(`.drink-option input[value="${drink}"]`).closest('.drink-option').dataset.matcha === 'true';
+    const isFoundersFavorite = drink === "Founder's Favorite";
+    const size = getSelectedValue('size');
+    let milk = null, sweetness = null, sweetnessLevel = null;
+
+    if (!size) { alert('Please select a size.'); return; }
+
+    if (isMatcha) {
+      milk = getSelectedValue('milk');
+      sweetnessLevel = getSelectedValue('sweetness_level');
+      if (!isFoundersFavorite) {
+        sweetness = getSelectedValue('sweetness');
+        if (!milk || !sweetness || !sweetnessLevel) {
+          alert('Please complete the milk and sweetness preferences for your drink.');
+          return;
+        }
+      } else if (!milk || !sweetnessLevel) {
+        alert('Please complete the milk and sweetness preferences for your drink.');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    const { error: orderError } = await supabase.from('orders').insert([{
+      name, email, drink,
+      size,
+      milk_preference: milk,
+      sweetness: sweetness,
+      sweetness_level: sweetnessLevel,
+      comments: comments || null,
+      ordered_at: new Date().toISOString()
+    }]);
+
+    if (orderError) {
+      btn.disabled = false;
+      btn.textContent = 'Submit order';
+      alert('Something went wrong. Please try again.');
+      return;
+    }
+
+    await supabase.from('members').insert([{
+      name, email, joined_at: new Date().toISOString()
+    }]);
+
+    btn.disabled = false;
+    btn.textContent = 'Submit order';
+    document.getElementById('thankyou').classList.add('active');
+  };
+</script>
+
+</body>
+</html>

@@ -352,6 +352,9 @@
     <button class="tab" onclick="switchTab('members')">
       Members <span class="tab-count" id="count-members">3</span>
     </button>
+    <button class="tab" onclick="switchTab('orders')">
+      Cafe Orders <span class="tab-count" id="count-orders">0</span>
+    </button>
   </div>
 
   <!-- CONTENT -->
@@ -499,6 +502,39 @@
       </table>
     </div>
 
+    <!-- CAFE ORDERS TAB -->
+    <div class="tab-panel" id="panel-orders">
+      <div class="section-header">
+        <div class="section-title">Cafe Orders</div>
+        <div class="section-note">Orders placed through The Peoples Cafe</div>
+      </div>
+
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="Search by name or email..." oninput="filterOrders(this.value)"/>
+      </div>
+
+      <table class="members-table" id="orders-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Drink</th>
+            <th>Size</th>
+            <th>Milk</th>
+            <th>Sweetness</th>
+            <th>Level</th>
+            <th>Comments</th>
+            <th>Ordered</th>
+          </tr>
+        </thead>
+        <tbody id="orders-body"></tbody>
+      </table>
+
+      <div class="empty" id="orders-empty" style="display:none">
+        No orders yet
+      </div>
+    </div>
+
   </div>
 
 <script type="module">
@@ -511,6 +547,7 @@
 
   let allStories = [];
   let allMembers = [];
+  let allOrders = [];
 
   // ── TAB SWITCHING ──
   window.switchTab = (tab) => {
@@ -522,17 +559,20 @@
 
   // ── LOAD DATA ──
   async function loadAll() {
-    const [{ data: stories }, { data: members }] = await Promise.all([
+    const [{ data: stories }, { data: members }, { data: orders }] = await Promise.all([
       supabase.from('stories').select('*').order('submitted_at', { ascending: false }),
-      supabase.from('members').select('*').order('joined_at', { ascending: false })
+      supabase.from('members').select('*').order('joined_at', { ascending: false }),
+      supabase.from('orders').select('*').order('ordered_at', { ascending: false })
     ]);
 
     allStories = stories || [];
     allMembers = members || [];
+    allOrders = orders || [];
 
     renderPending();
     renderApproved();
     renderMembers();
+    renderOrders();
     updateCounts();
   }
 
@@ -542,6 +582,7 @@
     document.getElementById('count-pending').textContent = pending;
     document.getElementById('count-approved').textContent = approved;
     document.getElementById('count-members').textContent = allMembers.length;
+    document.getElementById('count-orders').textContent = allOrders.length;
   }
 
   // ── RENDER PENDING ──
@@ -634,6 +675,40 @@
   }
 
   window.filterMembers = (query) => renderMembers(query);
+
+  // ── RENDER ORDERS ──
+  function renderOrders(filter = '') {
+    const tbody = document.getElementById('orders-body');
+    const empty = document.getElementById('orders-empty');
+    const filtered = allOrders.filter(o =>
+      (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+      (o.name || '').toLowerCase().includes(filter.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = filtered.map(o => {
+      const date = new Date(o.ordered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `<tr>
+        <td>${o.name || '—'}</td>
+        <td>${o.email || '—'}</td>
+        <td>${o.drink || '—'}</td>
+        <td>${o.size || '—'}</td>
+        <td>${o.milk_preference || '—'}</td>
+        <td>${o.sweetness || '—'}</td>
+        <td>${o.sweetness_level || '—'}</td>
+        <td>${o.comments || '—'}</td>
+        <td>${date}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  window.filterOrders = (query) => renderOrders(query);
 
   // ── APPROVE ──
   window.approveStory = async (id, name, email) => {
