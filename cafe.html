@@ -55,12 +55,10 @@
       margin: 0 auto;
     }
 
-    .asterisk-icon {
+    .asterisk-icon-img {
       display: inline-block;
-      width: 14px; height: 14px;
-      background-color: #fff5c8;
-      -webkit-mask: url('favicon.png') no-repeat center / contain;
-      mask: url('favicon.png') no-repeat center / contain;
+      width: 12px;
+      height: auto;
       vertical-align: middle;
       margin-left: 0.4rem;
     }
@@ -307,7 +305,7 @@
 <!-- MAIN -->
 <main>
   <img class="spin-asterisk" src="asterisk-butter.png" alt="" />
-  <div class="page-title">THE PEOPLES CAFE<span class="asterisk-icon"></span></div>
+  <div class="page-title">THE PEOPLES CAFE<img class="asterisk-icon-img" src="asterisk-butter.png" alt="" /></div>
   <p class="page-sub">We're happy to have you at our cafe! Finish your order by adding your email to join the community.</p>
 
   <label class="drink-option" data-matcha="true">
@@ -390,7 +388,7 @@
     <div class="field-label">Comments</div>
     <textarea class="field" id="order-comments" placeholder="anything else we should know?" style="height:60px;"></textarea>
 
-    <div class="field-label">Email<span class="asterisk-icon"></span></div>
+    <div class="field-label">Email<img class="asterisk-icon-img" src="asterisk-butter.png" alt="" /></div>
     <input class="field" id="order-email" type="email" placeholder="email address" />
 
     <button id="submit-btn" onclick="submitOrder()">Submit order</button>
