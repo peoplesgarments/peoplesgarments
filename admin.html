@@ -4,591 +4,455 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PG Admin</title>
-  <link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,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Lq1UzIAOOgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/Z" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #f7f7f5;
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #fff;
       color: #111;
-      font-family: Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── TOP BAR ── */
-    .topbar {
+      min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.2rem 2rem;
-      background: #fff;
-      color: #111;
-      border-bottom: 1px solid #eee;
     }
 
-    .topbar-title {
-      font-weight: 700;
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      min-height: 100vh;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 0 1.5rem;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.4rem 1.8rem;
+      border-bottom: 1px solid #e8e8e8;
+      margin-bottom: 1.6rem;
+    }
+    .sidebar-logo-title {
       font-size: 0.75rem;
-      letter-spacing: 0.15em;
+      font-weight: 700;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      color: #111;
     }
-
-    .topbar-sub {
-      font-size: 0.6rem;
+    .sidebar-logo-sub {
+      font-size: 0.58rem;
       letter-spacing: 0.08em;
+      color: #bbb;
       text-transform: uppercase;
-      opacity: 0.4;
-      color: #111;
+      margin-top: 3px;
     }
 
-    /* ── TABS ── */
-    .tabs {
+    .sidebar-section-label {
+      font-size: 0.54rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ccc;
+      padding: 0 1.4rem;
+      margin-bottom: 0.3rem;
+      margin-top: 1.2rem;
+    }
+
+    .nav-item {
       display: flex;
-      border-bottom: 1px solid #ddd;
-      background: #fff;
-      padding: 0 2rem;
-    }
-
-    .tab {
-      font-family: Arial, sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 1rem 1.5rem;
+      align-items: center;
+      gap: 9px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.74rem;
+      color: #aaa;
       cursor: pointer;
-      border: none;
-      background: none;
-      color: #999;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      transition: color 0.2s, border-color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      border-left: 2px solid transparent;
+      transition: all 0.12s;
+      user-select: none;
+      margin-right: 0.5rem;
+      border-radius: 0 5px 5px 0;
     }
-
-    .tab.active {
+    .nav-item:hover { color: #555; background: #f5f5f5; }
+    .nav-item.active {
       color: #111;
-      border-bottom-color: #111;
+      background: #f2f2f2;
+      border-left-color: #111;
+      font-weight: 600;
     }
-
-    .tab:hover { color: #111; }
-
-    .tab-count {
-      background: #e0e0e0;
-      color: #888;
-      font-size: 0.5rem;
+    .nav-icon { font-size: 0.78rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-count {
+      margin-left: auto;
+      background: #efefef;
+      color: #999;
+      font-size: 0.58rem;
       font-weight: 700;
-      padding: 0.15rem 0.4rem;
+      padding: 2px 7px;
       border-radius: 20px;
-      letter-spacing: 0;
     }
+    .nav-item.active .nav-count { background: #111; color: #fff; }
 
-    .tab.active .tab-count { background: #111; color: #fff; }
-    .tab:not(.active) .tab-count { background: #e0e0e0; color: #999; }
-
-    /* ── CONTENT AREA ── */
-    .content {
-      padding: 2rem;
-      max-width: 1100px;
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 1.2rem 1.4rem 0;
+      border-top: 1px solid #e8e8e8;
     }
-
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    /* ── SECTION HEADER ── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-
-    .section-title {
-      font-weight: 700;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
+    .sidebar-refresh {
+      width: 100%;
+      background: #f5f5f5;
+      border: 1px solid #e8e8e8;
+      color: #999;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
+      padding: 8px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .sidebar-refresh:hover { background: #eee; color: #555; }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .section-note {
-      font-size: 0.6rem;
-      color: #888;
-      letter-spacing: 0.03em;
+    /* ── HERO ── */
+    .hero {
+      background: #fff;
+      padding: 2rem 2.8rem 1.8rem;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .hero-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 0.5rem;
+    }
+    .hero-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.05em;
+      line-height: 1.2;
     }
 
-    /* ── STORY CARD ── */
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      padding: 2.2rem 2.8rem;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #111;
+      margin-bottom: 0.25rem;
+    }
+    .panel-note {
+      font-size: 0.7rem;
+      color: #bbb;
+      margin-bottom: 1.8rem;
+    }
+
+    /* ── STORY CARDS ── */
     .story-card {
       background: #fff;
       border: 1px solid #e8e8e8;
-      padding: 1.4rem;
+      border-radius: 10px;
+      padding: 1.5rem;
       margin-bottom: 1rem;
       display: grid;
-      grid-template-columns: 100px 1fr auto;
-      gap: 1.2rem;
+      grid-template-columns: 96px 1fr auto;
+      gap: 1.4rem;
       align-items: start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: box-shadow 0.15s;
     }
+    .story-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
 
     .story-card img {
-      width: 100px;
-      height: 100px;
+      width: 96px;
+      height: 96px;
       object-fit: cover;
+      border-radius: 7px;
+      background: #f5f5f5;
+      flex-shrink: 0;
       display: block;
-      background: #eee;
     }
-
-    .story-info {}
-
-    .story-handle {
-      font-weight: 700;
-      font-size: 0.65rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 0.2rem;
-    }
-
-    .story-meta {
-      font-size: 0.58rem;
-      color: #888;
-      letter-spacing: 0.03em;
-      margin-bottom: 0.6rem;
-      text-transform: uppercase;
-    }
-
-    .story-text {
-      font-size: 0.62rem;
-      line-height: 1.7;
-      color: #333;
-      margin-bottom: 0.6rem;
-    }
-
-    .story-fields {
+    .story-thumb-empty {
+      width: 96px;
+      height: 96px;
+      border-radius: 7px;
+      background: #f5f5f5;
       display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .story-field {
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #888;
-    }
-
-    .story-field strong {
-      display: block;
-      color: #111;
-      font-weight: 700;
-      margin-bottom: 0.1rem;
-    }
-
-    /* ── ACTIONS ── */
-    .story-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-width: 90px;
-    }
-
-    .order-card {
-      background: #fff;
-      border: 1px solid #e8e8e8;
-      padding: 1.4rem;
-      margin-bottom: 1rem;
-    }
-
-    .order-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 0.8rem;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-
-    .order-name {
-      font-weight: 700;
-      font-size: 0.7rem;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      color: #111;
-    }
-
-    .order-date {
-      font-size: 0.58rem;
-      color: #888;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    .order-email {
-      font-size: 0.6rem;
-      color: #888;
-      margin-bottom: 1rem;
-    }
-
-    .order-fields {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.8rem;
-    }
-
-    .order-field {
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #888;
-    }
-
-    .order-field strong {
-      display: block;
-      color: #111;
-      font-weight: 700;
-      margin-bottom: 0.1rem;
-      text-transform: none;
-      letter-spacing: 0;
-      font-size: 0.68rem;
-    }
-
-    .order-comments {
-      font-size: 0.62rem;
-      line-height: 1.6;
-      color: #333;
-      border-top: 1px solid #eee;
-      padding-top: 0.6rem;
-    }
-
-    .btn-approve {
-      font-family: Arial, sans-serif;
-      font-size: 0.55rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.6rem 0.8rem;
-      background: #e8e8e8;
-      color: #111;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .btn-approve:hover { opacity: 0.6; }
-
-    .btn-reject {
-      font-family: Arial, sans-serif;
-      font-size: 0.55rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.6rem 0.8rem;
-      background: #f2f2f2;
-      color: #888;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .btn-reject:hover { opacity: 0.6; }
-
-    .btn-remove {
-      font-family: Arial, sans-serif;
-      font-size: 0.55rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.6rem 0.8rem;
-      background: #f2f2f2;
-      color: #aaa;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .btn-remove:hover { opacity: 0.6; }
-
-    .status-badge {
-      font-size: 0.5rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.25rem 0.6rem;
-      background: #e8f5e9;
-      color: #2e7d32;
-      display: inline-block;
-      margin-bottom: 0.5rem;
-    }
-
-    /* ── MEMBERS TABLE ── */
-    .members-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border: 1px solid #e8e8e8;
-    }
-
-    .members-table th {
-      font-size: 0.55rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.9rem 1.2rem;
-      text-align: left;
-      border-bottom: 1px solid #e8e8e8;
-      color: #888;
-      background: #fafafa;
-    }
-
-    .members-table td {
-      font-size: 0.62rem;
-      padding: 0.9rem 1.2rem;
-      border-bottom: 1px solid #f0f0f0;
-      color: #111;
-      letter-spacing: 0.02em;
-    }
-
-    .members-table tr:last-child td { border-bottom: none; }
-    .members-table tr:hover td { background: #fafafa; }
-
-    .member-type {
-      font-size: 0.48rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.2rem 0.5rem;
-      display: inline-block;
-    }
-
-    .member-type.newsletter { background: #e8f0ff; color: #1a4db3; }
-    .member-type.member { background: #f0f0f0; color: #444; }
-    .member-type.submitter { background: #fff3e0; color: #c96a00; }
-
-    /* ── EMPTY STATE ── */
-    .empty {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: #bbb;
-      font-size: 0.65rem;
-      letter-spacing: 0.05em;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.52rem;
+      color: #ccc;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       border: 1px dashed #ddd;
+      flex-shrink: 0;
+    }
+
+    .story-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+    .story-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+
+    .status-badge {
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e8f5ec;
+      color: #2a7a3b;
+    }
+    .pending-badge {
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #f5f5f5;
+      color: #888;
+    }
+    .voice-badge {
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #f0ebff;
+      color: #6d28d9;
+    }
+
+    .story-handle { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.02em; color: #111; }
+    .story-meta { font-size: 0.68rem; color: #bbb; }
+    .story-text { font-size: 0.78rem; line-height: 1.65; color: #555; }
+
+    .voice-block {
+      background: #faf8ff;
+      border-left: 3px solid #d8c5f8;
+      border-radius: 0 5px 5px 0;
+      padding: 0.6rem 0.85rem;
+    }
+    .voice-block-label {
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #8b5cf6;
+      margin-bottom: 3px;
+    }
+    .voice-block-text { font-size: 0.75rem; line-height: 1.6; color: #666; }
+
+    .voice-player { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+    .voice-player-label { font-size: 0.55rem; color: #bbb; letter-spacing: 0.05em; text-transform: uppercase; }
+    .voice-player audio { height: 26px; flex: 1; max-width: 220px; }
+
+    .story-fields { display: flex; gap: 6px; flex-wrap: wrap; }
+    .story-field {
+      font-size: 0.68rem;
+      color: #666;
       background: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #ebebeb;
+    }
+    .story-field strong {
+      display: block;
+      font-size: 0.52rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #ccc;
+      margin-bottom: 1px;
     }
 
-    /* ── SEARCH BAR ── */
-    .search-bar {
-      display: flex;
-      gap: 0.8rem;
-      margin-bottom: 1.5rem;
-    }
+    .story-actions { display: flex; flex-direction: column; gap: 7px; flex-shrink: 0; }
 
+    .btn-approve {
+      background: #111; color: #fff;
+      border: none; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 9px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-approve:hover { background: #333; }
+    .btn-reject {
+      background: transparent; color: #c0392b;
+      border: 1px solid #f5c6c2; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-reject:hover { background: #fff5f5; }
+    .btn-remove {
+      background: transparent; color: #aaa;
+      border: 1px solid #e8e8e8; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-remove:hover { background: #f5f5f5; }
+
+    /* ── MEMBERS ── */
     .search-input {
-      font-family: Arial, sans-serif;
-      font-size: 0.65rem;
-      padding: 0.6rem 0.9rem;
-      border: 1px solid #ddd;
-      background: #fff;
-      color: #111;
-      width: 260px;
-      outline: none;
-      letter-spacing: 0.02em;
+      width: 100%; max-width: 360px;
+      background: #fff; border: 1px solid #e8e8e8;
+      border-radius: 7px; padding: 10px 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.76rem; color: #111;
+      outline: none; margin-bottom: 1.2rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .search-input:focus { border-color: #aaa; }
+    .search-input::placeholder { color: #ccc; }
+
+    .members-table {
+      width: 100%; border-collapse: collapse;
+      background: #fff; border-radius: 10px;
+      overflow: hidden; border: 1px solid #e8e8e8;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .members-table th {
+      text-align: left; font-size: 0.6rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: #bbb; padding: 11px 15px;
+      border-bottom: 1px solid #f0f0f0; background: #fafafa;
+    }
+    .members-table td {
+      padding: 11px 15px; border-bottom: 1px solid #f5f5f5;
+      color: #555; font-size: 0.76rem;
+    }
+    .members-table tr:last-child td { border-bottom: none; }
+    .members-table tr:hover td { background: #fafafa; }
+    .member-type {
+      font-size: 0.56rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px; display: inline-block;
+      background: #f0f0f0; color: #777;
     }
 
-    .search-input:focus { border-color: #111; }
+    /* ── ORDERS ── */
+    .order-card {
+      background: #fff; border-radius: 10px;
+      padding: 1.3rem 1.5rem; margin-bottom: 0.9rem;
+      border: 1px solid #e8e8e8;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .order-card-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+    .order-name { font-size: 0.86rem; font-weight: 700; color: #111; }
+    .order-date { font-size: 0.66rem; color: #bbb; }
+    .order-email { font-size: 0.7rem; color: #bbb; margin-bottom: 0.85rem; }
+    .order-fields { display: flex; gap: 7px; flex-wrap: wrap; }
+    .order-field {
+      font-size: 0.7rem; color: #666;
+      background: #fff; padding: 4px 10px;
+      border-radius: 4px; border: 1px solid #ebebeb;
+    }
+    .order-field strong { display: block; font-size: 0.54rem; letter-spacing: 0.06em; text-transform: uppercase; color: #ccc; margin-bottom: 1px; }
+    .order-comments { margin-top: 9px; font-size: 0.7rem; color: #999; font-style: italic; }
+
+    /* ── EMPTY ── */
+    .empty {
+      text-align: center; padding: 4rem 2rem;
+      color: #ccc; font-size: 0.75rem; letter-spacing: 0.04em;
+      background: #fff; border-radius: 10px;
+      border: 1px solid #e8e8e8;
+    }
   </style>
 </head>
 <body>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div>
-      <div class="topbar-title">People's Garments — Admin</div>
-      <div class="topbar-sub">peoplesgarments@gmail.com</div>
-    </div>
-    <div class="topbar-sub">Private access only</div>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('pending')">
-      Pending <span class="tab-count" id="count-pending">2</span>
-    </button>
-    <button class="tab" onclick="switchTab('approved')">
-      Approved <span class="tab-count" id="count-approved">5</span>
-    </button>
-    <button class="tab" onclick="switchTab('members')">
-      Members <span class="tab-count" id="count-members">3</span>
-    </button>
-    <button class="tab" onclick="switchTab('orders')">
-      Cafe Orders <span class="tab-count" id="count-orders">0</span>
-    </button>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- PENDING TAB -->
-    <div class="tab-panel active" id="panel-pending">
-      <div class="section-header">
-        <div class="section-title">Pending Approval</div>
-        <div class="section-note">Review and approve before stories go live</div>
-      </div>
-
-      <div class="story-card" id="pending-1">
-        <img src="husna.jpg" alt=""/>
-        <div class="story-info">
-          <div class="story-handle">@HUUSSNNAAA</div>
-          <div class="story-meta">Husna Nashnoush · husna@email.com · Submitted May 24, 2026</div>
-          <div class="story-text">The beadedness of the bag feels like an ode to my Afghan diasporic experience, not because it's from Afghanistan, but because it represents a culture that is mine, yet one I've only ever known from a distance.</div>
-          <div class="story-fields">
-            <div class="story-field"><strong>Object</strong>Beaded Bag</div>
-            <div class="story-field"><strong>Origin</strong>Birthday gift</div>
-            <div class="story-field"><strong>Category</strong>Bags</div>
-            <div class="story-field"><strong>IG Consent</strong>Yes</div>
-          </div>
-        </div>
-        <div class="story-actions">
-          <button class="btn-approve" onclick="approveStory('pending-1')">Approve</button>
-          <button class="btn-reject" onclick="rejectStory('pending-1')">Reject</button>
-        </div>
-      </div>
-
-      <div class="story-card" id="pending-2">
-        <img src="fatoumata.jpg" alt=""/>
-        <div class="story-info">
-          <div class="story-handle">@FATOUMATA</div>
-          <div class="story-meta">Fatoumata Kaba · fatoumata@email.com · Submitted May 24, 2026</div>
-          <div class="story-text">Objects that travel with me and remind me of where I come from. My bag and sandals have been everywhere with me.</div>
-          <div class="story-fields">
-            <div class="story-field"><strong>Object</strong>Bag & Sandals</div>
-            <div class="story-field"><strong>Origin</strong>Guinea</div>
-            <div class="story-field"><strong>Category</strong>Bags</div>
-            <div class="story-field"><strong>IG Consent</strong>Yes</div>
-          </div>
-        </div>
-        <div class="story-actions">
-          <button class="btn-approve" onclick="approveStory('pending-2')">Approve</button>
-          <button class="btn-reject" onclick="rejectStory('pending-2')">Reject</button>
-        </div>
-      </div>
-
-      <div class="empty" id="pending-empty" style="display:none">
-        No pending submissions
-      </div>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">Peoples Garments</div>
+      <div class="sidebar-logo-sub">Admin</div>
     </div>
 
-    <!-- APPROVED TAB -->
-    <div class="tab-panel" id="panel-approved">
-      <div class="section-header">
-        <div class="section-title">Approved Stories</div>
-        <div class="section-note">Live on the archive</div>
-      </div>
-
-      <div class="story-card" id="approved-1">
-        <img src="mariamalulah_bowl.jpg" alt=""/>
-        <div class="story-info">
-          <div class="status-badge">Live</div>
-          <div class="story-handle">@MARIAMALULAH</div>
-          <div class="story-meta">Mariam · mbalde@email.com · Approved May 20, 2026</div>
-          <div class="story-text">My mom always used these bowls as decor all around our house. When I moved to nyc I took them without knowing and now use them for floral arrangements.</div>
-          <div class="story-fields">
-            <div class="story-field"><strong>Object</strong>Small Bowls</div>
-            <div class="story-field"><strong>Origin</strong>Guinea</div>
-            <div class="story-field"><strong>Category</strong>Pots</div>
-          </div>
-        </div>
-        <div class="story-actions">
-          <button class="btn-remove" onclick="removeStory('approved-1')">Remove</button>
-        </div>
-      </div>
-
-      <div class="story-card" id="approved-2">
-        <img src="aissatoubalde.jpg" alt=""/>
-        <div class="story-info">
-          <div class="status-badge">Live</div>
-          <div class="story-handle">@AISSATOUBALDE_</div>
-          <div class="story-meta">Aissata · aissata@email.com · Approved May 21, 2026</div>
-          <div class="story-text">Panicking the night before Eid, remembering my mom has all these beautiful bazin two piece outfits she doesn't wear anymore. It's my favorite memory.</div>
-          <div class="story-fields">
-            <div class="story-field"><strong>Object</strong>Mother's Bazin</div>
-            <div class="story-field"><strong>Origin</strong>Guinea</div>
-            <div class="story-field"><strong>Category</strong>Scarves</div>
-          </div>
-        </div>
-        <div class="story-actions">
-          <button class="btn-remove" onclick="removeStory('approved-2')">Remove</button>
-        </div>
-      </div>
-
+    <div class="sidebar-section-label">Submissions</div>
+    <div class="nav-item active" onclick="switchPanel('pending')">
+      <span class="nav-icon">○</span> Pending
+      <span class="nav-count" id="count-pending">—</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('approved')">
+      <span class="nav-icon">✓</span> Approved
+      <span class="nav-count" id="count-approved">—</span>
     </div>
 
-    <!-- MEMBERS TAB -->
-    <div class="tab-panel" id="panel-members">
-      <div class="section-header">
-        <div class="section-title">Members & Subscribers</div>
-        <div class="section-note">Everyone who has joined or signed up for updates</div>
+    <div class="sidebar-section-label">Community</div>
+    <div class="nav-item" onclick="switchPanel('members')">
+      <span class="nav-icon">◇</span> Members
+      <span class="nav-count" id="count-members">—</span>
+    </div>
+
+    <div class="sidebar-section-label">Events</div>
+    <div class="nav-item" onclick="switchPanel('orders')">
+      <span class="nav-icon">☕</span> Cafe Orders
+      <span class="nav-count" id="count-orders">—</span>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-refresh" onclick="loadAll()">↻ Refresh</button>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="hero">
+      <div class="hero-title">Peoples Garments Admin</div>
+    </div>
+
+    <div class="content">
+
+      <div class="panel active" id="panel-pending">
+        <div class="panel-title">Pending Submissions</div>
+        <div class="panel-note">Review and approve before stories go live on the archive</div>
+        <div id="pending-list"></div>
+        <div class="empty" id="pending-empty" style="display:none;">No pending submissions right now</div>
       </div>
 
-      <div class="search-bar">
+      <div class="panel" id="panel-approved">
+        <div class="panel-title">Approved Stories</div>
+        <div class="panel-note">Live on the archive</div>
+        <div id="approved-list"></div>
+        <div class="empty" id="approved-empty" style="display:none;">No approved stories yet</div>
+      </div>
+
+      <div class="panel" id="panel-members">
+        <div class="panel-title">Members & Subscribers</div>
+        <div class="panel-note">Everyone who has joined or signed up for updates</div>
         <input class="search-input" type="text" placeholder="Search by name or email..." oninput="filterMembers(this.value)"/>
+        <table class="members-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Instagram</th><th>Type</th><th>Joined</th></tr></thead>
+          <tbody id="members-body"></tbody>
+        </table>
+        <div class="empty" id="members-empty" style="display:none;">No members yet</div>
       </div>
 
-      <table class="members-table" id="members-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Instagram</th>
-            <th>Type</th>
-            <th>Joined</th>
-          </tr>
-        </thead>
-        <tbody id="members-body">
-          <tr>
-            <td>Mariam Balde</td>
-            <td>mbalde@email.com</td>
-            <td>@mariamalulah</td>
-            <td><span class="member-type submitter">Submitter</span></td>
-            <td>May 20, 2026</td>
-          </tr>
-          <tr>
-            <td>Husna Nashnoush</td>
-            <td>husna@email.com</td>
-            <td>@huussnnaaa</td>
-            <td><span class="member-type member">Member</span></td>
-            <td>May 22, 2026</td>
-          </tr>
-          <tr>
-            <td>Anonymous</td>
-            <td>hello@example.com</td>
-            <td>—</td>
-            <td><span class="member-type newsletter">Newsletter</span></td>
-            <td>May 23, 2026</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- CAFE ORDERS TAB -->
-    <div class="tab-panel" id="panel-orders">
-      <div class="section-header">
-        <div class="section-title">Cafe Orders</div>
-        <div class="section-note">Orders placed through The Peoples Cafe</div>
-      </div>
-
-      <div class="search-bar">
+      <div class="panel" id="panel-orders">
+        <div class="panel-title">Cafe Orders</div>
+        <div class="panel-note">Orders placed through The Peoples Cafe</div>
         <input class="search-input" type="text" placeholder="Search by name or email..." oninput="filterOrders(this.value)"/>
+        <div id="orders-list"></div>
+        <div class="empty" id="orders-empty" style="display:none;">No orders yet</div>
       </div>
 
-      <div id="orders-list"></div>
-
-      <div class="empty" id="orders-empty" style="display:none">
-        No orders yet
-      </div>
     </div>
-
   </div>
 
 <script type="module">
@@ -599,155 +463,155 @@
     'sb_publishable_77y2BrAleX6d-J1z430tSA_b3tg2F8k'
   );
 
-  let allStories = [];
-  let allMembers = [];
-  let allOrders = [];
+  const STORAGE_URL = 'https://tmojrzfkyxdnhvxsrjdp.supabase.co/storage/v1/object/public/story-images/';
 
-  // ── TAB SWITCHING ──
-  window.switchTab = (tab) => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
-    document.getElementById(`panel-${tab}`).classList.add('active');
+  let allStories = [], allMembers = [], allOrders = [];
+
+  window.switchPanel = (panel) => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[onclick="switchPanel('${panel}')"]`).classList.add('active');
+    document.getElementById(`panel-${panel}`).classList.add('active');
   };
 
-  // ── LOAD DATA ──
-  async function loadAll() {
+  window.loadAll = async () => {
     const [{ data: stories }, { data: members }, { data: orders }] = await Promise.all([
       supabase.from('stories').select('*').order('submitted_at', { ascending: false }),
       supabase.from('members').select('*').order('joined_at', { ascending: false }),
       supabase.from('orders').select('*').order('ordered_at', { ascending: false })
     ]);
-
     allStories = stories || [];
     allMembers = members || [];
-    allOrders = orders || [];
-
-    renderPending();
-    renderApproved();
-    renderMembers();
-    renderOrders();
-    updateCounts();
-  }
+    allOrders  = orders  || [];
+    renderPending(); renderApproved(); renderMembers(); renderOrders(); updateCounts();
+  };
 
   function updateCounts() {
-    const pending = allStories.filter(s => s.status === 'pending').length;
-    const approved = allStories.filter(s => s.status === 'approved').length;
-    document.getElementById('count-pending').textContent = pending;
-    document.getElementById('count-approved').textContent = approved;
-    document.getElementById('count-members').textContent = allMembers.length;
-    document.getElementById('count-orders').textContent = allOrders.length;
+    const p = allStories.filter(s => s.status === 'pending').length;
+    const a = allStories.filter(s => s.status === 'approved').length;
+    const m = allMembers.length;
+    const o = allOrders.length;
+    document.getElementById('count-pending').textContent  = p;
+    document.getElementById('count-approved').textContent = a;
+    document.getElementById('count-members').textContent  = m;
+    document.getElementById('count-orders').textContent   = o;
+
   }
 
-  // ── RENDER PENDING ──
-  function renderPending() {
-    const container = document.getElementById('panel-pending');
-    const pending = allStories.filter(s => s.status === 'pending');
-    const header = container.querySelector('.section-header');
-    const empty = container.querySelector('.empty');
-
-    container.querySelectorAll('.story-card').forEach(c => c.remove());
-
-    if (pending.length === 0) {
-      empty.style.display = 'block';
-      return;
-    }
-    empty.style.display = 'none';
-
-    pending.forEach(s => {
-      const card = buildCard(s, 'pending');
-      container.insertBefore(card, empty);
-    });
-  }
-
-  // ── RENDER APPROVED ──
-  function renderApproved() {
-    const container = document.getElementById('panel-approved');
-    const approved = allStories.filter(s => s.status === 'approved');
-    const header = container.querySelector('.section-header');
-
-    container.querySelectorAll('.story-card').forEach(c => c.remove());
-
-    approved.forEach(s => {
-      const card = buildCard(s, 'approved');
-      container.appendChild(card);
-    });
-  }
-
-  // ── BUILD CARD ──
   function buildCard(s, type) {
     const div = document.createElement('div');
     div.className = 'story-card';
     div.id = `card-${s.id}`;
 
-    const imgSrc = s.image_urls && s.image_urls.length > 0 ? s.image_urls[0] : '';
-    const date = new Date(s.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const date     = new Date(s.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const handle   = s.instagram ? '@' + s.instagram.replace('@','').toUpperCase() : s.name.toUpperCase();
+    const imgSrc   = s.image_urls && s.image_urls.length > 0 ? s.image_urls[0] : null;
+    const voiceUrl = s.voice_note_path ? STORAGE_URL + s.voice_note_path : null;
+
+    // split typed story from voice transcript
+    let typedStory = s.memory_story || '';
+    let transcript = '';
+    const marker = '— voice note transcript —';
+    const mi = typedStory.indexOf(marker);
+    if (mi !== -1) {
+      transcript = typedStory.slice(mi + marker.length).trim();
+      const bi = typedStory.indexOf('\n\n' + marker);
+      typedStory = (bi !== -1 ? typedStory.slice(0, bi) : typedStory.slice(0, mi)).trim();
+    }
+
+    const thumb = imgSrc
+      ? `<img src="${imgSrc}" alt=""/>`
+      : `<div class="story-thumb-empty">no image</div>`;
+
+    const liveBadge  = type === 'approved'
+      ? `<span class="status-badge">Live</span>`
+      : `<span class="pending-badge">Pending</span>`;
+    const voiceBadge = voiceUrl ? `<span class="voice-badge">🎙 Voice</span>` : '';
+
+    const storyBlock = typedStory ? `<div class="story-text">${typedStory}</div>` : '';
+
+    const transcriptBlock = transcript
+      ? `<div class="voice-block"><div class="voice-block-label">Voice note transcript</div><div class="voice-block-text">${transcript}</div></div>`
+      : (voiceUrl ? `<div class="voice-block"><div class="voice-block-label">Voice note transcript</div><div class="voice-block-text" style="color:#ccc;font-style:italic;font-size:0.72rem;">Transcription in progress...</div></div>` : '');
+
+    const audioBlock = voiceUrl
+      ? `<div class="voice-player"><span class="voice-player-label">Audio</span><audio controls src="${voiceUrl}"></audio></div>` : '';
+
+    const actions = type === 'pending'
+      ? `<button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
+         <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>`
+      : `<button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>`;
 
     div.innerHTML = `
-      <img src="${imgSrc}" alt="" style="${!imgSrc ? 'background:#eee;' : ''}"/>
+      ${thumb}
       <div class="story-info">
-        ${type === 'approved' ? '<div class="status-badge">Live</div>' : ''}
-        <div class="story-handle">${s.instagram ? '@' + s.instagram.replace('@','') : s.name.toUpperCase()}</div>
+        <div class="story-top">${liveBadge}${voiceBadge}<span class="story-handle">${handle}</span></div>
         <div class="story-meta">${s.name} · ${s.email} · ${type === 'approved' ? 'Approved' : 'Submitted'} ${date}</div>
-        <div class="story-text">${s.memory_story || '—'}</div>
+        ${storyBlock}${transcriptBlock}${audioBlock}
         <div class="story-fields">
-          <div class="story-field"><strong>Object</strong>${s.garment_name || '—'}</div>
+          <div class="story-field"><strong>Garment / Object</strong>${s.garment_name || '—'}</div>
           <div class="story-field"><strong>Origin</strong>${s.origin || '—'}</div>
           <div class="story-field"><strong>Consent</strong>${s.consent_platform ? 'Yes' : 'No'}</div>
         </div>
       </div>
-      <div class="story-actions">
-        ${type === 'pending' ? `
-          <button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
-          <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>
-        ` : `
-          <button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>
-        `}
-      </div>
-    `;
+      <div class="story-actions">${actions}</div>`;
     return div;
   }
 
-  // ── RENDER MEMBERS ──
+  function renderPending() {
+    const list  = document.getElementById('pending-list');
+    const empty = document.getElementById('pending-empty');
+    const items = allStories.filter(s => s.status === 'pending');
+    list.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    items.forEach(s => list.appendChild(buildCard(s, 'pending')));
+  }
+
+  function renderApproved() {
+    const list  = document.getElementById('approved-list');
+    const empty = document.getElementById('approved-empty');
+    const items = allStories.filter(s => s.status === 'approved');
+    list.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    items.forEach(s => list.appendChild(buildCard(s, 'approved')));
+  }
+
   function renderMembers(filter = '') {
     const tbody = document.getElementById('members-body');
-    const filtered = allMembers.filter(m =>
+    const empty = document.getElementById('members-empty');
+    const items = allMembers.filter(m =>
       (m.email || '').toLowerCase().includes(filter.toLowerCase()) ||
-      (m.name || '').toLowerCase().includes(filter.toLowerCase())
+      (m.name  || '').toLowerCase().includes(filter.toLowerCase())
     );
-
-    tbody.innerHTML = filtered.map(m => {
-      const date = new Date(m.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    tbody.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = items.map(m => {
+      const date = m.joined_at ? new Date(m.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
       return `<tr>
         <td>${m.name || '—'}</td>
-        <td>${m.email}</td>
+        <td>${m.email || '—'}</td>
         <td>${m.instagram ? '@' + m.instagram.replace('@','') : '—'}</td>
-        <td><span class="member-type newsletter">Newsletter</span></td>
+        <td><span class="member-type">Newsletter</span></td>
         <td>${date}</td>
       </tr>`;
     }).join('');
   }
 
-  window.filterMembers = (query) => renderMembers(query);
-
-  // ── RENDER ORDERS ──
   function renderOrders(filter = '') {
-    const list = document.getElementById('orders-list');
+    const list  = document.getElementById('orders-list');
     const empty = document.getElementById('orders-empty');
-    const filtered = allOrders.filter(o =>
+    const items = allOrders.filter(o =>
       (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
-      (o.name || '').toLowerCase().includes(filter.toLowerCase())
+      (o.name  || '').toLowerCase().includes(filter.toLowerCase())
     );
-
-    if (filtered.length === 0) {
-      list.innerHTML = '';
-      empty.style.display = 'block';
-      return;
-    }
+    list.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-
-    list.innerHTML = filtered.map(o => {
-      const date = new Date(o.ordered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    list.innerHTML = items.map(o => {
+      const date = o.ordered_at ? new Date(o.ordered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
       return `<div class="order-card">
         <div class="order-card-top">
           <div class="order-name">${o.name || '—'}</div>
@@ -755,20 +619,20 @@
         </div>
         <div class="order-email">${o.email || '—'}</div>
         <div class="order-fields">
-          <div class="order-field"><strong>${o.drink || '—'}</strong>Drink</div>
-          <div class="order-field"><strong>${o.size || '—'}</strong>Size</div>
-          <div class="order-field"><strong>${o.milk_preference || '—'}</strong>Milk</div>
-          <div class="order-field"><strong>${o.sweetness || '—'}</strong>Sweetness</div>
-          <div class="order-field"><strong>${o.sweetness_level || '—'}</strong>Level</div>
+          <div class="order-field"><strong>Drink</strong>${o.drink || '—'}</div>
+          <div class="order-field"><strong>Size</strong>${o.size || '—'}</div>
+          <div class="order-field"><strong>Milk</strong>${o.milk_preference || '—'}</div>
+          <div class="order-field"><strong>Sweetness</strong>${o.sweetness || '—'}</div>
+          ${o.sweetness_level ? `<div class="order-field"><strong>Level</strong>${o.sweetness_level}</div>` : ''}
         </div>
-        ${o.comments ? `<div class="order-comments">${o.comments}</div>` : ''}
+        ${o.comments ? `<div class="order-comments">"${o.comments}"</div>` : ''}
       </div>`;
     }).join('');
   }
 
-  window.filterOrders = (query) => renderOrders(query);
+  window.filterMembers = q => renderMembers(q);
+  window.filterOrders  = q => renderOrders(q);
 
-  // ── APPROVE ──
   window.approveStory = async (id, name, email) => {
     if (!confirm('Approve this story? It will go live on the archive.')) return;
     const { error } = await supabase.from('stories').update({ status: 'approved' }).eq('id', id);
@@ -777,7 +641,6 @@
     renderPending(); renderApproved(); updateCounts();
   };
 
-  // ── REJECT ──
   window.rejectStory = async (id) => {
     if (!confirm('Reject and delete this submission?')) return;
     const { error } = await supabase.from('stories').update({ status: 'rejected' }).eq('id', id);
@@ -786,7 +649,6 @@
     renderPending(); updateCounts();
   };
 
-  // ── REMOVE ──
   window.removeStory = async (id) => {
     if (!confirm('Remove this story from the archive?')) return;
     const { error } = await supabase.from('stories').update({ status: 'rejected' }).eq('id', id);
