@@ -308,6 +308,14 @@
       padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
     }
     .btn-remove:hover { background: #f5f5f5; }
+    .btn-email {
+      background: transparent; color: #111;
+      border: 1px solid #ccc; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-email:hover { background: #f5f5f5; }
+    .btn-email:disabled { opacity: 0.5; cursor: wait; }
     .btn-photo {
       background: transparent; color: #111;
       border: 1px solid #ccc; font-family: Arial, Helvetica, sans-serif;
@@ -375,6 +383,21 @@
     }
     .order-field strong { display: block; font-size: 0.54rem; letter-spacing: 0.06em; text-transform: uppercase; color: #ccc; margin-bottom: 1px; }
     .order-comments { margin-top: 9px; font-size: 0.7rem; color: #999; font-style: italic; }
+    .order-actions { display: flex; justify-content: flex-end; margin-top: 0.9rem; }
+    .btn-complete {
+      background: #111; color: #fff;
+      border: none; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-complete:hover { background: #333; }
+    .btn-undo-complete {
+      background: transparent; color: #aaa;
+      border: 1px solid #e8e8e8; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-undo-complete:hover { background: #f5f5f5; }
 
     /* ── EMPTY ── */
     .empty {
@@ -413,6 +436,10 @@
     <div class="nav-item" onclick="switchPanel('orders')">
       <span class="nav-icon">☕</span> Cafe Orders
       <span class="nav-count" id="count-orders">—</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('completed-orders')">
+      <span class="nav-icon">✓</span> Completed Orders
+      <span class="nav-count" id="count-completed-orders">—</span>
     </div>
 
     <div class="sidebar-bottom">
@@ -461,6 +488,14 @@
         <div class="empty" id="orders-empty" style="display:none;">No orders yet</div>
       </div>
 
+      <div class="panel" id="panel-completed-orders">
+        <div class="panel-title">Completed Orders</div>
+        <div class="panel-note">Orders you've already made and handed off</div>
+        <input class="search-input" type="text" placeholder="Search by name or email..." oninput="filterCompletedOrders(this.value)"/>
+        <div id="completed-orders-list"></div>
+        <div class="empty" id="completed-orders-empty" style="display:none;">No completed orders yet</div>
+      </div>
+
     </div>
   </div>
 
@@ -492,18 +527,20 @@
     allStories = stories || [];
     allMembers = members || [];
     allOrders  = orders  || [];
-    renderPending(); renderApproved(); renderMembers(); renderOrders(); updateCounts();
+    renderPending(); renderApproved(); renderMembers(); renderOrders(); renderCompletedOrders(); updateCounts();
   };
 
   function updateCounts() {
-    const p = allStories.filter(s => s.status === 'pending').length;
+    const p = allStories.filter(s => s.status === 'pending' || !s.status).length;
     const a = allStories.filter(s => s.status === 'approved').length;
     const m = allMembers.length;
-    const o = allOrders.length;
+    const o = allOrders.filter(o => !o.completed).length;
+    const c = allOrders.filter(o => o.completed).length;
     document.getElementById('count-pending').textContent  = p;
     document.getElementById('count-approved').textContent = a;
     document.getElementById('count-members').textContent  = m;
     document.getElementById('count-orders').textContent   = o;
+    document.getElementById('count-completed-orders').textContent = c;
 
   }
 
@@ -555,7 +592,8 @@
       ? `${photoInput}
          <button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
          <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>`
-      : `<button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>`;
+      : `<button class="btn-email" id="email-btn-${s.id}" onclick="sendApprovalEmail('${s.id}', '${s.email}')">Send Approval Email</button>
+         <button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>`;
 
     div.innerHTML = `
       ${thumb}
@@ -576,7 +614,7 @@
   function renderPending() {
     const list  = document.getElementById('pending-list');
     const empty = document.getElementById('pending-empty');
-    const items = allStories.filter(s => s.status === 'pending');
+    const items = allStories.filter(s => s.status === 'pending' || !s.status);
     list.innerHTML = '';
     if (!items.length) { empty.style.display = 'block'; return; }
     empty.style.display = 'none';
@@ -615,19 +653,12 @@
     }).join('');
   }
 
-  function renderOrders(filter = '') {
-    const list  = document.getElementById('orders-list');
-    const empty = document.getElementById('orders-empty');
-    const items = allOrders.filter(o =>
-      (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
-      (o.name  || '').toLowerCase().includes(filter.toLowerCase())
-    );
-    list.innerHTML = '';
-    if (!items.length) { empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-    list.innerHTML = items.map(o => {
-      const date = o.ordered_at ? new Date(o.ordered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-      return `<div class="order-card">
+  function buildOrderCard(o, completed) {
+    const date = o.ordered_at ? new Date(o.ordered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const action = completed
+      ? `<div class="order-actions"><button class="btn-undo-complete" onclick="uncompleteOrder('${o.id}')">Undo</button></div>`
+      : `<div class="order-actions"><button class="btn-complete" onclick="completeOrder('${o.id}')">Mark Completed</button></div>`;
+    return `<div class="order-card">
         <div class="order-card-top">
           <div class="order-name">${o.name || '—'}</div>
           <div class="order-date">${date}</div>
@@ -641,12 +672,80 @@
           ${o.sweetness_level ? `<div class="order-field"><strong>Level</strong>${o.sweetness_level}</div>` : ''}
         </div>
         ${o.comments ? `<div class="order-comments">"${o.comments}"</div>` : ''}
+        ${action}
       </div>`;
-    }).join('');
+  }
+
+  function renderOrders(filter = '') {
+    const list  = document.getElementById('orders-list');
+    const empty = document.getElementById('orders-empty');
+    const items = allOrders.filter(o => !o.completed && (
+      (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+      (o.name  || '').toLowerCase().includes(filter.toLowerCase())
+    ));
+    list.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    list.innerHTML = items.map(o => buildOrderCard(o, false)).join('');
+  }
+
+  function renderCompletedOrders(filter = '') {
+    const list  = document.getElementById('completed-orders-list');
+    const empty = document.getElementById('completed-orders-empty');
+    const items = allOrders.filter(o => o.completed && (
+      (o.email || '').toLowerCase().includes(filter.toLowerCase()) ||
+      (o.name  || '').toLowerCase().includes(filter.toLowerCase())
+    ));
+    list.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    list.innerHTML = items.map(o => buildOrderCard(o, true)).join('');
   }
 
   window.filterMembers = q => renderMembers(q);
   window.filterOrders  = q => renderOrders(q);
+  window.filterCompletedOrders = q => renderCompletedOrders(q);
+
+  window.completeOrder = async (id) => {
+    const { error } = await supabase.from('orders').update({ completed: true }).eq('id', id);
+    if (error) { alert('Error marking completed. Try again.'); return; }
+    allOrders = allOrders.map(o => o.id === id ? { ...o, completed: true } : o);
+    renderOrders(); renderCompletedOrders(); updateCounts();
+  };
+
+  window.uncompleteOrder = async (id) => {
+    const { error } = await supabase.from('orders').update({ completed: false }).eq('id', id);
+    if (error) { alert('Error undoing. Try again.'); return; }
+    allOrders = allOrders.map(o => o.id === id ? { ...o, completed: false } : o);
+    renderOrders(); renderCompletedOrders(); updateCounts();
+  };
+
+  window.sendApprovalEmail = async (id, email) => {
+    if (!email) { alert('This submission has no email on file.'); return; }
+    if (!confirm(`Send the "your story is live" email to ${email}?`)) return;
+
+    const btn = document.getElementById(`email-btn-${id}`);
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    const { data, error } = await supabase.functions.invoke('send-approval-email', {
+      body: { email, storyId: id }
+    });
+
+    if (error || (data && data.error)) {
+      alert('Error sending email. Try again.');
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      return;
+    }
+
+    btn.textContent = 'Sent ✓';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    }, 3000);
+  };
 
   window.uploadStoryPhoto = async (id, input) => {
     const file = input.files && input.files[0];
