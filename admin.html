@@ -308,6 +308,15 @@
       padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
     }
     .btn-remove:hover { background: #f5f5f5; }
+    .btn-photo {
+      background: transparent; color: #111;
+      border: 1px solid #ccc; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-photo:hover { background: #f5f5f5; }
+    .btn-photo:disabled { opacity: 0.5; cursor: wait; }
+    .photo-input { display: none; }
 
     /* ── MEMBERS ── */
     .search-input {
@@ -537,8 +546,14 @@
     const audioBlock = voiceUrl
       ? `<div class="voice-player"><span class="voice-player-label">Audio</span><audio controls src="${voiceUrl}"></audio></div>` : '';
 
+    const photoInput = type === 'pending'
+      ? `<input type="file" accept="image/*" class="photo-input" id="photo-input-${s.id}" onchange="uploadStoryPhoto('${s.id}', this)"/>
+         <button class="btn-photo" id="photo-btn-${s.id}" onclick="document.getElementById('photo-input-${s.id}').click()">${imgSrc ? 'Change Photo' : 'Add Photo'}</button>`
+      : '';
+
     const actions = type === 'pending'
-      ? `<button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
+      ? `${photoInput}
+         <button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
          <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>`
       : `<button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>`;
 
@@ -632,6 +647,47 @@
 
   window.filterMembers = q => renderMembers(q);
   window.filterOrders  = q => renderOrders(q);
+
+  window.uploadStoryPhoto = async (id, input) => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const btn = document.getElementById(`photo-btn-${id}`);
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${id}-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('story-images')
+      .upload(path, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) {
+      alert('Upload failed. Try again.');
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      return;
+    }
+
+    const publicUrl = STORAGE_URL + path;
+
+    const { error: updateError } = await supabase
+      .from('stories')
+      .update({ image_urls: [publicUrl] })
+      .eq('id', id);
+
+    if (updateError) {
+      alert('Photo uploaded but saving to the story failed. Try again.');
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      return;
+    }
+
+    allStories = allStories.map(s => s.id === id ? { ...s, image_urls: [publicUrl] } : s);
+    renderPending();
+  };
 
   window.approveStory = async (id, name, email) => {
     if (!confirm('Approve this story? It will go live on the archive.')) return;
