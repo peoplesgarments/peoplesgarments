@@ -309,6 +309,14 @@
   <p class="page-sub">We're happy to have you at our cafe! Finish your order by adding your email to join the community.</p>
 
   <label class="drink-option" data-matcha="true">
+    <input type="radio" name="drink" value="Cookie Crumb Latte" />
+    <div>
+      <span class="drink-name">Cookie Crumb Latte</span>
+      <div class="drink-desc">Iced matcha latte + banana syrup + cookie butter cream top</div>
+    </div>
+  </label>
+
+  <label class="drink-option" data-matcha="true">
     <input type="radio" name="drink" value="Founder's Favorite" />
     <div>
       <span class="drink-name">Founder's Favorite</span>
@@ -320,23 +328,15 @@
     <input type="radio" name="drink" value="She's A Sweet One" />
     <div>
       <span class="drink-name">She's A Sweet One</span>
-      <div class="drink-desc">Iced matcha + vanilla cream top</div>
+      <div class="drink-desc">Iced matcha + salted maple/vanilla cream top</div>
     </div>
   </label>
 
   <label class="drink-option" data-matcha="true">
-    <input type="radio" name="drink" value="Fruity Booty" />
+    <input type="radio" name="drink" value="The Basic" />
     <div>
-      <span class="drink-name">Fruity Booty</span>
-      <div class="drink-desc">Iced matcha + strawberry cream top</div>
-    </div>
-  </label>
-
-  <label class="drink-option" data-matcha="false">
-    <input type="radio" name="drink" value="Bissap" />
-    <div>
-      <span class="drink-name">Bissap</span>
-      <div class="drink-desc">Hibiscus refresher + a hint of pineapple</div>
+      <span class="drink-name">The Basic</span>
+      <div class="drink-desc">Iced matcha + any sweetener of your choice</div>
     </div>
   </label>
 
@@ -346,8 +346,7 @@
     <div class="choice-group">
       <div class="choice-label">Size</div>
       <div class="choice-row" data-group="size">
-        <label class="choice-pill"><input type="radio" name="size" value="12 oz" />12 oz</label>
-        <label class="choice-pill" id="pill-16oz"><input type="radio" name="size" value="16 oz" />16 oz</label>
+        <label class="choice-pill selected" id="pill-16oz"><input type="radio" name="size" value="16 oz" checked />16 oz</label>
       </div>
     </div>
 
@@ -359,7 +358,16 @@
       </div>
     </div>
 
-    <div class="choice-group" id="group-sweetness-flavor">
+    <div class="choice-group" id="group-cookie-sweetness" style="display:none;">
+      <div class="choice-label">Sweetness</div>
+      <div class="choice-row" data-group="cookie_sweetness">
+        <label class="choice-pill"><input type="radio" name="cookie_sweetness" value="Just The Banana Syrup" />Just the banana syrup</label>
+        <label class="choice-pill"><input type="radio" name="cookie_sweetness" value="Just The Cream Top" />Just the cream top</label>
+        <label class="choice-pill"><input type="radio" name="cookie_sweetness" value="With Both" />With both</label>
+      </div>
+    </div>
+
+    <div class="choice-group" id="group-sweetness-flavor" style="display:none;">
       <div class="choice-label">Sweetness</div>
       <div class="choice-row" data-group="sweetness">
         <label class="choice-pill"><input type="radio" name="sweetness" value="Agave" />Agave</label>
@@ -414,6 +422,7 @@
   // ── DRINK SELECTION ──
   const drinkOptions = document.querySelectorAll('.drink-option');
   const sweetnessFlavorGroup = document.getElementById('group-sweetness-flavor');
+  const cookieSweetnessGroup = document.getElementById('group-cookie-sweetness');
   const milkGroup = document.getElementById('group-milk');
   const sweetnessLevelGroup = document.getElementById('group-sweetness-level');
   const pill16oz = document.getElementById('pill-16oz');
@@ -429,22 +438,23 @@
       opt.classList.add('selected');
       const radio = opt.querySelector('input[type="radio"]');
       const isFoundersFavorite = radio.value === "Founder's Favorite";
-      const isBissap = radio.value === 'Bissap';
+      const isCookieCrumb = radio.value === 'Cookie Crumb Latte';
+      const isSweetOne = radio.value === "She's A Sweet One" || radio.value === 'The Basic';
 
-      sweetnessFlavorGroup.style.display = (isFoundersFavorite || isBissap) ? 'none' : 'block';
-      milkGroup.style.display = isBissap ? 'none' : 'block';
-      sweetnessLevelGroup.style.display = isBissap ? 'none' : 'block';
-      pill16oz.style.display = isBissap ? 'none' : 'block';
+      // cookie-crumb sweetness-type group only shows for Cookie Crumb Latte
+      cookieSweetnessGroup.style.display = isCookieCrumb ? 'block' : 'none';
+      if (!isCookieCrumb) clearGroup(cookieSweetnessGroup);
 
-      if (isFoundersFavorite || isBissap) clearGroup(sweetnessFlavorGroup);
-      if (isBissap) {
-        clearGroup(milkGroup);
-        clearGroup(sweetnessLevelGroup);
-        if (pill16oz.querySelector('input').checked) {
-          pill16oz.classList.remove('selected');
-          pill16oz.querySelector('input').checked = false;
-        }
+      // agave/maple/vanilla flavor group shows for She's A Sweet One always,
+      // and for Cookie Crumb Latte only once "just the cream top" is chosen
+      if (isSweetOne) {
+        sweetnessFlavorGroup.style.display = 'block';
+      } else {
+        sweetnessFlavorGroup.style.display = 'none';
+        clearGroup(sweetnessFlavorGroup);
       }
+
+      if (isFoundersFavorite) clearGroup(sweetnessFlavorGroup);
     });
   });
 
@@ -455,6 +465,13 @@
       group.querySelectorAll('.choice-pill').forEach(p => p.classList.remove('selected'));
       pill.classList.add('selected');
       pill.querySelector('input').checked = true;
+
+      // when Cookie Crumb Latte's "just the cream top" is picked, reveal the flavor group
+      if (group.dataset.group === 'cookie_sweetness') {
+        const showFlavor = pill.querySelector('input').value === 'Just The Cream Top';
+        sweetnessFlavorGroup.style.display = showFlavor ? 'block' : 'none';
+        if (!showFlavor) clearGroup(sweetnessFlavorGroup);
+      }
     });
   });
 
@@ -472,32 +489,50 @@
     const drink = getSelectedValue('drink');
     const name = document.getElementById('order-name').value.trim();
     const email = document.getElementById('order-email').value.trim();
-    const comments = document.getElementById('order-comments').value.trim();
+    let comments = document.getElementById('order-comments').value.trim();
 
     if (!drink) { alert('Please select a drink.'); return; }
     if (!name) { alert('Please enter your name.'); return; }
     if (!email) { alert('Please enter your email.'); return; }
 
-    const isMatcha = document.querySelector(`.drink-option input[value="${drink}"]`).closest('.drink-option').dataset.matcha === 'true';
     const isFoundersFavorite = drink === "Founder's Favorite";
+    const isSweetOne = drink === "She's A Sweet One" || drink === 'The Basic';
+    const isCookieCrumb = drink === 'Cookie Crumb Latte';
     const size = getSelectedValue('size');
-    let milk = null, sweetness = null, sweetnessLevel = null;
+    let milk = null, sweetness = null, sweetnessLevel = null, cookieSweetness = null;
 
     if (!size) { alert('Please select a size.'); return; }
 
-    if (isMatcha) {
-      milk = getSelectedValue('milk');
-      sweetnessLevel = getSelectedValue('sweetness_level');
-      if (!isFoundersFavorite) {
-        sweetness = getSelectedValue('sweetness');
-        if (!milk || !sweetness || !sweetnessLevel) {
-          alert('Please complete the milk and sweetness preferences for your drink.');
-          return;
-        }
-      } else if (!milk || !sweetnessLevel) {
-        alert('Please complete the milk and sweetness preferences for your drink.');
+    milk = getSelectedValue('milk');
+    sweetnessLevel = getSelectedValue('sweetness_level');
+    if (!milk || !sweetnessLevel) {
+      alert('Please complete the milk and sweetness preferences for your drink.');
+      return;
+    }
+
+    if (isSweetOne) {
+      sweetness = getSelectedValue('sweetness');
+      if (!sweetness) {
+        alert('Please choose a sweetness flavor.');
         return;
       }
+    }
+
+    if (isCookieCrumb) {
+      cookieSweetness = getSelectedValue('cookie_sweetness');
+      if (!cookieSweetness) {
+        alert('Please choose a sweetness option for the Cookie Crumb Latte.');
+        return;
+      }
+      if (cookieSweetness === 'Just The Cream Top') {
+        sweetness = getSelectedValue('sweetness');
+        if (!sweetness) {
+          alert('Please choose a sweetness flavor for the cream top.');
+          return;
+        }
+      }
+      // fold the cookie-crumb sweetness type into comments so no schema change is needed
+      comments = `Sweetness: ${cookieSweetness}${sweetness ? ' (' + sweetness + ')' : ''}` + (comments ? ` — ${comments}` : '');
     }
 
     const btn = document.getElementById('submit-btn');

@@ -734,7 +734,9 @@
     });
 
     if (error || (data && data.error)) {
-      alert('Error sending email. Try again.');
+      const detail = (data && data.error) ? data.error : (error ? error.message : 'Unknown error');
+      console.error('send-approval-email failed:', error, data);
+      alert('Error sending email:\n\n' + detail);
       btn.disabled = false;
       btn.textContent = originalLabel;
       return;
