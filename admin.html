@@ -708,14 +708,14 @@
 
   window.completeOrder = async (id) => {
     const { error } = await supabase.from('orders').update({ completed: true }).eq('id', id);
-    if (error) { alert('Error marking completed. Try again.'); return; }
+    if (error) { console.error('completeOrder error:', error); alert('Error marking completed. Try again.'); return; }
     allOrders = allOrders.map(o => o.id === id ? { ...o, completed: true } : o);
     renderOrders(); renderCompletedOrders(); updateCounts();
   };
 
   window.uncompleteOrder = async (id) => {
     const { error } = await supabase.from('orders').update({ completed: false }).eq('id', id);
-    if (error) { alert('Error undoing. Try again.'); return; }
+    if (error) { console.error('uncompleteOrder error:', error); alert('Error undoing. Try again.'); return; }
     allOrders = allOrders.map(o => o.id === id ? { ...o, completed: false } : o);
     renderOrders(); renderCompletedOrders(); updateCounts();
   };
