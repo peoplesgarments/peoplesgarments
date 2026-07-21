@@ -64,8 +64,12 @@ html,body { width:100%; background:#fff; font-family:Arial, sans-serif; }
 .card:nth-child(4n+2) { grid-column:2; transform: translateX(-5%); }
 .card:nth-child(4n+3) { grid-column:4; }
 .card:nth-child(4n+4) { grid-column:5; margin-left:auto; }
-.card-media { width:100%; display:block; background:#eaeaea; }
+.card-media { width:100%; display:block; background:#eaeaea; position:relative; }
 .card-media img { width:100%; display:block; object-fit:cover; }
+.card-multi-badge {
+  position:absolute; top:8px; right:8px; width:16px; height:16px; z-index:2;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+}
 .card-meta {
   display:flex; justify-content:space-between; align-items:center;
   margin-top:6px; font-family:Arial, sans-serif;
@@ -103,7 +107,24 @@ html,body { width:100%; background:#fff; font-family:Arial, sans-serif; }
   position:absolute; top:12px; right:16px; background:none; border:none;
   color:#fff; font-size:16px; font-family:Arial,sans-serif; cursor:pointer; z-index:2;
 }
-.story-modal img { width:100%; display:block; }
+.story-carousel { position:relative; width:100%; overflow:hidden; background:#000; touch-action: pan-y; }
+.story-carousel-track { display:flex; transition:transform 0.25s ease; }
+.story-carousel-track img { width:100%; flex-shrink:0; display:block; }
+.carousel-arrow {
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:rgba(255,255,255,0.85); border:none; width:28px; height:28px;
+  border-radius:50%; font-size:1rem; font-family:Arial,sans-serif; line-height:1;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2;
+  color:#111; padding:0;
+}
+.carousel-arrow-left { left:10px; }
+.carousel-arrow-right { right:10px; }
+.carousel-dots {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  display:flex; gap:5px; z-index:2;
+}
+.carousel-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.5); }
+.carousel-dot.active { background:#fff; }
 .story-body { padding:18px 22px 26px; }
 .story-head {
   display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;
@@ -165,7 +186,12 @@ html,body { width:100%; background:#fff; font-family:Arial, sans-serif; }
 <div class="overlay" id="storyOverlay" onclick="if(event.target===this) closeStory()">
   <div class="story-modal" id="storyModal">
     <button class="story-modal-close" onclick="closeStory()">✕</button>
-    <img id="storyImg" src="" alt=""/>
+    <div class="story-carousel" id="storyCarousel">
+      <div class="story-carousel-track" id="storyCarouselTrack"></div>
+      <button class="carousel-arrow carousel-arrow-left" id="carouselPrev" onclick="carouselPrev(event)" style="display:none;">&#8249;</button>
+      <button class="carousel-arrow carousel-arrow-right" id="carouselNext" onclick="carouselNext(event)" style="display:none;">&#8250;</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
     <div class="story-body">
       <div class="story-head">
         <div class="story-user" id="storyUser"></div>
@@ -215,8 +241,11 @@ function renderGrid() {
     const card = document.createElement('div');
     card.className = 'card';
     card.onclick = () => openStory(i, true);
+    const multiBadge = s.imgs.length > 1
+      ? `<svg class="card-multi-badge" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M3 13V5a2 2 0 0 1 2-2h8"/></svg>`
+      : '';
     card.innerHTML = `
-      <div class="card-media"><img src="${s.img}" alt="${s.user}"/></div>
+      <div class="card-media">${multiBadge}<img src="${s.img}" alt="${s.user}"/></div>
       <div class="card-meta">
         <div class="card-user">${s.user}</div>
         <div class="card-stars">${starIcon(s.slug, isLiked(s.slug))}<span id="cardLikes-${s.slug}">${likeCount(s)}</span></div>
@@ -246,6 +275,7 @@ async function loadStories() {
       user: row.instagram ? '@' + row.instagram.replace('@', '') : (row.name || 'Anonymous'),
       likes: row.likes || 0,
       img: row.image_urls[0],
+      imgs: row.image_urls,
       garment: row.garment_name || '',
       origin: row.origin || '',
       story: row.memory_story || ''
@@ -260,6 +290,21 @@ async function loadStories() {
     if (idx > -1) openStory(idx, false);
   }
 }
+
+const carouselEl = document.getElementById('storyCarousel');
+carouselEl.addEventListener('touchstart', e => {
+  carouselTouchStartX = e.touches[0].clientX;
+});
+carouselEl.addEventListener('touchend', e => {
+  if (carouselTouchStartX === null) return;
+  const deltaX = e.changedTouches[0].clientX - carouselTouchStartX;
+  const total = window._currentStory ? window._currentStory.imgs.length : 1;
+  if (total > 1) {
+    if (deltaX > 40) window.carouselPrev();
+    else if (deltaX < -40) window.carouselNext();
+  }
+  carouselTouchStartX = null;
+});
 
 loadStories();
 
@@ -314,9 +359,12 @@ function renderStarState(slug) {
   }
 }
 
+let carouselIndex = 0;
+let carouselTouchStartX = null;
+
 function openStory(i, pushHash) {
   const s = stories[i];
-  document.getElementById('storyImg').src = s.img;
+  buildCarousel(s.imgs);
   document.getElementById('storyUser').textContent = s.user;
   document.getElementById('storyGarment').textContent = s.garment;
   document.getElementById('storyOrigin').textContent = s.origin;
@@ -326,6 +374,45 @@ function openStory(i, pushHash) {
   renderStarState(s.slug);
   if (pushHash) history.replaceState(null, '', '#' + s.slug);
 }
+
+function buildCarousel(imgs) {
+  carouselIndex = 0;
+  const track = document.getElementById('storyCarouselTrack');
+  track.innerHTML = imgs.map(url => `<img src="${url}" alt=""/>`).join('');
+
+  const dotsWrap = document.getElementById('carouselDots');
+  const multi = imgs.length > 1;
+  dotsWrap.innerHTML = multi
+    ? imgs.map((_, idx) => `<div class="carousel-dot${idx === 0 ? ' active' : ''}"></div>`).join('')
+    : '';
+
+  document.getElementById('carouselPrev').style.display = multi ? 'flex' : 'none';
+  document.getElementById('carouselNext').style.display = multi ? 'flex' : 'none';
+  updateCarouselPosition();
+}
+
+function updateCarouselPosition() {
+  const track = document.getElementById('storyCarouselTrack');
+  track.style.transform = `translateX(-${carouselIndex * 100}%)`;
+  document.querySelectorAll('#carouselDots .carousel-dot').forEach((dot, idx) => {
+    dot.classList.toggle('active', idx === carouselIndex);
+  });
+}
+
+window.carouselPrev = (evt) => {
+  if (evt) evt.stopPropagation();
+  const total = window._currentStory ? window._currentStory.imgs.length : 1;
+  carouselIndex = (carouselIndex - 1 + total) % total;
+  updateCarouselPosition();
+};
+
+window.carouselNext = (evt) => {
+  if (evt) evt.stopPropagation();
+  const total = window._currentStory ? window._currentStory.imgs.length : 1;
+  carouselIndex = (carouselIndex + 1) % total;
+  updateCarouselPosition();
+};
+
 function closeStory() {
   document.getElementById('storyOverlay').classList.remove('open');
   history.replaceState(null, '', location.pathname);
