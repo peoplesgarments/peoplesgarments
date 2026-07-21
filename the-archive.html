@@ -43,14 +43,23 @@ html,body { width:100%; background:#fff; font-family:Arial, sans-serif; }
 }
 
 /* HEADER — large vertical title fixed to the right edge, stays put while the grid scrolls */
+.archive-title-wrap {
+  position:fixed; top:50%; right:18px; transform:translateY(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:22px; z-index:15;
+}
 .archive-title {
-  position:fixed; top:50%; right:18px; transform:translateY(-50%) rotate(180deg);
-  writing-mode:vertical-rl; z-index:15; pointer-events:none;
+  writing-mode:vertical-rl; transform:rotate(180deg); pointer-events:none;
 }
 .archive-title h1 {
   font-family:Arial, sans-serif; font-weight:800; font-size:6.51rem;
   letter-spacing:-0.05em; color:#111; text-transform:lowercase; line-height:1;
   white-space:nowrap;
+}
+.archive-add-story {
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  font-size:12px; letter-spacing:-0.05em; font-family:Arial,sans-serif;
+  font-weight:700; color:#111; text-transform:none; white-space:nowrap;
+  text-decoration:none; cursor:pointer;
 }
 
 /* GRID — 2+2 column grouping, narrower center gutter, right padding clears the fixed title */
@@ -164,7 +173,7 @@ html,body { width:100%; background:#fff; font-family:Arial, sans-serif; }
     <a href="shop.html"><button>SHOP</button></a>
     <div class="dropdown" id="dropdown">
       <a href="index.html">HOME</a>
-      <a href="#" onclick="openSubmit && openSubmit(); return false;">ADD YOURS</a>
+      <a href="index.html#submit">ADD YOURS</a>
       <a href="about.html">ABOUT</a>
       <a href="#" onclick="return false;">PEOPLES FEATURES</a>
     </div>
@@ -177,8 +186,11 @@ html,body { width:100%; background:#fff; font-family:Arial, sans-serif; }
   </div>
 </div>
 
-<div class="archive-title">
-  <h1>the archive</h1>
+<div class="archive-title-wrap">
+  <div class="archive-title">
+    <h1>the archive</h1>
+  </div>
+  <a href="index.html#submit" class="archive-add-story">add your story</a>
 </div>
 
 <div class="grid" id="archiveGrid"></div>
