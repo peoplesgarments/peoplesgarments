@@ -182,6 +182,10 @@
       transition: box-shadow 0.15s;
     }
     .story-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+    .draggable-card { cursor: grab; }
+    .draggable-card:active { cursor: grabbing; }
+    .draggable-card.dragging { opacity: 0.4; }
+    .draggable-card.drag-over { border-top: 3px solid #111; }
 
     .story-card img {
       width: 96px;
@@ -526,7 +530,7 @@
 
       <div class="panel" id="panel-approved">
         <div class="panel-title">Approved Stories</div>
-        <div class="panel-note">Live on the archive</div>
+        <div class="panel-note">Live on the archive — drag a card to reorder how it appears there</div>
         <div id="approved-list"></div>
         <div class="empty" id="approved-empty" style="display:none;">No approved stories yet</div>
       </div>
@@ -648,6 +652,11 @@
     const div = document.createElement('div');
     div.className = 'story-card';
     div.id = `card-${s.id}`;
+    if (type === 'approved') {
+      div.draggable = true;
+      div.dataset.id = s.id;
+      div.classList.add('draggable-card');
+    }
 
     const date     = new Date(s.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const handle   = s.instagram ? '@' + s.instagram.replace('@','').toUpperCase() : s.name.toUpperCase();
@@ -713,6 +722,7 @@
         ${typedStory ? `<div class="edit-field edit-field-story" id="field-story-${s.id}" data-original="${typedStory.replace(/"/g,'&quot;')}" contenteditable="false">${typedStory}</div>` : ''}
         ${transcriptBlock}${audioBlock}
         <div class="story-fields">
+          <div class="story-field"><strong>Instagram Handle</strong><div class="edit-field edit-field-tag" id="field-instagram-${s.id}" data-original="${(s.instagram||'').replace(/"/g,'&quot;')}" contenteditable="false">${s.instagram || ''}</div></div>
           <div class="story-field"><strong>Garment / Object</strong><div class="edit-field edit-field-tag" id="field-garment-${s.id}" data-original="${(s.garment_name||'').replace(/"/g,'&quot;')}" contenteditable="false">${s.garment_name || ''}</div></div>
           <div class="story-field"><strong>Origin</strong><div class="edit-field edit-field-tag" id="field-origin-${s.id}" data-original="${(s.origin||'').replace(/"/g,'&quot;')}" contenteditable="false">${s.origin || ''}</div></div>
           <div class="story-field"><strong>Consent</strong>${s.consent_platform ? 'Yes' : 'No'}</div>
@@ -735,7 +745,9 @@
   function renderApproved() {
     const list  = document.getElementById('approved-list');
     const empty = document.getElementById('approved-empty');
-    const items = allStories.filter(s => s.status === 'approved');
+    const items = allStories
+      .filter(s => s.status === 'approved')
+      .sort((a, b) => (a.sort_order ?? Infinity) - (b.sort_order ?? Infinity));
     list.innerHTML = '';
     if (!items.length) { empty.style.display = 'block'; return; }
     empty.style.display = 'none';
@@ -984,12 +996,74 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const stage = document.getElementById('cropStage');
-    if (!stage) return;
-    stage.addEventListener('pointerdown', e => { stage.setPointerCapture(e.pointerId); cropPointerDown(e.clientX, e.clientY); });
-    stage.addEventListener('pointermove', e => cropPointerMove(e.clientX, e.clientY));
-    stage.addEventListener('pointerup', cropPointerUp);
-    stage.addEventListener('pointercancel', cropPointerUp);
+    if (stage) {
+      stage.addEventListener('pointerdown', e => { stage.setPointerCapture(e.pointerId); cropPointerDown(e.clientX, e.clientY); });
+      stage.addEventListener('pointermove', e => cropPointerMove(e.clientX, e.clientY));
+      stage.addEventListener('pointerup', cropPointerUp);
+      stage.addEventListener('pointercancel', cropPointerUp);
+    }
+    setupApprovedDragAndDrop();
   });
+
+  function setupApprovedDragAndDrop() {
+    const list = document.getElementById('approved-list');
+    if (!list) return;
+    let draggedEl = null;
+
+    list.addEventListener('dragstart', e => {
+      const card = e.target.closest('.draggable-card');
+      if (!card) return;
+      draggedEl = card;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    list.addEventListener('dragend', e => {
+      const card = e.target.closest('.draggable-card');
+      if (card) card.classList.remove('dragging');
+      list.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+
+    list.addEventListener('dragover', e => {
+      e.preventDefault();
+      const card = e.target.closest('.draggable-card');
+      if (!card || card === draggedEl) return;
+      list.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      card.classList.add('drag-over');
+    });
+
+    list.addEventListener('drop', async e => {
+      e.preventDefault();
+      const card = e.target.closest('.draggable-card');
+      list.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      if (!card || !draggedEl || card === draggedEl) return;
+
+      const cards = Array.from(list.querySelectorAll('.draggable-card'));
+      const draggedIdx = cards.indexOf(draggedEl);
+      const targetIdx = cards.indexOf(card);
+      if (draggedIdx < targetIdx) {
+        card.after(draggedEl);
+      } else {
+        card.before(draggedEl);
+      }
+
+      await persistApprovedOrder();
+    });
+  }
+
+  async function persistApprovedOrder() {
+    const cards = Array.from(document.querySelectorAll('#approved-list .draggable-card'));
+    const updates = cards.map((card, idx) => ({ id: card.dataset.id, sort_order: idx }));
+
+    for (const u of updates) {
+      await supabase.from('stories').update({ sort_order: u.sort_order }).eq('id', u.id);
+    }
+
+    allStories = allStories.map(s => {
+      const match = updates.find(u => u.id === s.id);
+      return match ? { ...s, sort_order: match.sort_order } : s;
+    });
+  }
 
   window.closeCropModal = () => {
     document.getElementById('cropOverlay').classList.remove('open');
@@ -1048,7 +1122,7 @@
 
   // ── EDIT TEXT ──
   window.startEditText = (id) => {
-    ['story', 'garment', 'origin'].forEach(key => {
+    ['story', 'garment', 'origin', 'instagram'].forEach(key => {
       const el = document.getElementById(`field-${key}-${id}`);
       if (!el) return;
       el.contentEditable = 'true';
@@ -1060,7 +1134,7 @@
   };
 
   window.cancelEditText = (id) => {
-    ['story', 'garment', 'origin'].forEach(key => {
+    ['story', 'garment', 'origin', 'instagram'].forEach(key => {
       const el = document.getElementById(`field-${key}-${id}`);
       if (!el) return;
       el.innerText = el.dataset.original || '';
@@ -1073,13 +1147,15 @@
   };
 
   window.saveText = async (id) => {
-    const storyEl   = document.getElementById(`field-story-${id}`);
-    const garmentEl = document.getElementById(`field-garment-${id}`);
-    const originEl  = document.getElementById(`field-origin-${id}`);
+    const storyEl     = document.getElementById(`field-story-${id}`);
+    const garmentEl   = document.getElementById(`field-garment-${id}`);
+    const originEl    = document.getElementById(`field-origin-${id}`);
+    const instagramEl = document.getElementById(`field-instagram-${id}`);
 
-    const newStory   = storyEl ? storyEl.innerText.trim() : '';
-    const newGarment = garmentEl ? garmentEl.innerText.trim() : '';
-    const newOrigin  = originEl ? originEl.innerText.trim() : '';
+    const newStory     = storyEl ? storyEl.innerText.trim() : '';
+    const newGarment   = garmentEl ? garmentEl.innerText.trim() : '';
+    const newOrigin    = originEl ? originEl.innerText.trim() : '';
+    const newInstagram = instagramEl ? instagramEl.innerText.trim().replace(/^@/, '') : '';
 
     const saveBtn = document.getElementById(`save-btn-${id}`);
     const originalLabel = saveBtn.textContent;
@@ -1088,7 +1164,7 @@
 
     const { error } = await supabase
       .from('stories')
-      .update({ memory_story: newStory, garment_name: newGarment, origin: newOrigin })
+      .update({ memory_story: newStory, garment_name: newGarment, origin: newOrigin, instagram: newInstagram })
       .eq('id', id);
 
     saveBtn.disabled = false;
@@ -1100,7 +1176,7 @@
     }
 
     allStories = allStories.map(s => s.id === id
-      ? { ...s, memory_story: newStory, garment_name: newGarment, origin: newOrigin }
+      ? { ...s, memory_story: newStory, garment_name: newGarment, origin: newOrigin, instagram: newInstagram }
       : s);
     renderPending(); renderApproved(); renderRemoved();
   };

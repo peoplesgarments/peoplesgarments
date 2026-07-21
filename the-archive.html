@@ -231,6 +231,7 @@ async function loadStories() {
     .from('stories')
     .select('*')
     .eq('status', 'approved')
+    .order('sort_order', { ascending: true, nullsFirst: false })
     .order('submitted_at', { ascending: false });
 
   if (error) {
