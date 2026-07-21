@@ -285,6 +285,32 @@
       margin-bottom: 1px;
     }
 
+    .edit-field {
+      font-family: inherit; font-size: inherit; color: inherit;
+      background: transparent; border: none; padding: 0; margin: 0;
+      line-height: inherit; white-space: pre-wrap; word-wrap: break-word;
+    }
+    .edit-field.editing {
+      background: #fffbe6; border: 1px solid #e8dfa0; border-radius: 4px;
+      padding: 4px 6px; outline: none;
+    }
+    .edit-field-story { font-size: 0.8rem; line-height: 1.55; color: #333; }
+    .edit-field-tag { font-size: 0.68rem; color: #666; min-width: 40px; }
+    .btn-save-text {
+      background: #111; color: #fff;
+      border: none; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-save-text:hover { background: #333; }
+    .btn-cancel-text {
+      background: transparent; color: #999;
+      border: 1px solid #ccc; font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-cancel-text:hover { background: #f5f5f5; }
+
     .story-actions { display: flex; flex-direction: column; gap: 7px; flex-shrink: 0; }
 
     .btn-approve {
@@ -648,7 +674,7 @@
       : (type === 'removed' ? `<span class="pending-badge">Removed</span>` : `<span class="pending-badge">Pending</span>`);
     const voiceBadge = voiceUrl ? `<span class="voice-badge">🎙 Voice</span>` : '';
 
-    const storyBlock = typedStory ? `<div class="story-text">${typedStory}</div>` : '';
+
 
     const transcriptBlock = transcript
       ? `<div class="voice-block"><div class="voice-block-label">Voice note transcript</div><div class="voice-block-text">${transcript}</div></div>`
@@ -657,23 +683,25 @@
     const audioBlock = voiceUrl
       ? `<div class="voice-player"><span class="voice-player-label">Audio</span><audio controls src="${voiceUrl}"></audio></div>` : '';
 
-    const photoInput = type === 'pending'
-      ? `<input type="file" accept="image/*" class="photo-input" id="photo-input-${s.id}" onchange="uploadStoryPhoto('${s.id}', this)"/>
-         <button class="btn-photo" id="photo-btn-${s.id}" onclick="document.getElementById('photo-input-${s.id}').click()">${imgSrc ? 'Change Photo' : 'Add Photo'}</button>`
-      : '';
+    const photoInput = `<input type="file" accept="image/*" class="photo-input" id="photo-input-${s.id}" onchange="uploadStoryPhoto('${s.id}', this)"/>
+         <button class="btn-photo" id="photo-btn-${s.id}" onclick="document.getElementById('photo-input-${s.id}').click()">${imgSrc ? 'Change Photo' : 'Add Photo'}</button>`;
 
     const cropButton = imgSrc
       ? `<button class="btn-photo" onclick="openCropModal('${s.id}', '${imgSrc}')">Crop Photo</button>`
       : '';
 
+    const editTextButton = `<button class="btn-photo" id="edit-btn-${s.id}" onclick="startEditText('${s.id}')">Edit Text</button>`;
+    const saveTextButtons = `<button class="btn-save-text" id="save-btn-${s.id}" style="display:none;" onclick="saveText('${s.id}')">Save Text</button>
+       <button class="btn-cancel-text" id="cancel-btn-${s.id}" style="display:none;" onclick="cancelEditText('${s.id}')">Cancel</button>`;
+
     const actions = type === 'pending'
-      ? `${photoInput}${cropButton}
+      ? `${photoInput}${cropButton}${editTextButton}${saveTextButtons}
          <button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
          <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>`
       : type === 'removed'
-      ? `${cropButton}
+      ? `${photoInput}${cropButton}${editTextButton}${saveTextButtons}
          <button class="btn-approve" onclick="restoreStory('${s.id}')">Restore to Archive</button>`
-      : `${cropButton}
+      : `${photoInput}${cropButton}${editTextButton}${saveTextButtons}
          <button class="btn-email" id="email-btn-${s.id}" onclick="sendApprovalEmail('${s.id}', '${s.email}')">Send Approval Email</button>
          <button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>`;
 
@@ -682,10 +710,11 @@
       <div class="story-info">
         <div class="story-top">${liveBadge}${voiceBadge}<span class="story-handle">${handle}</span></div>
         <div class="story-meta">${s.name} · ${s.email} · ${type === 'approved' ? 'Approved' : 'Submitted'} ${date}</div>
-        ${storyBlock}${transcriptBlock}${audioBlock}
+        ${typedStory ? `<div class="edit-field edit-field-story" id="field-story-${s.id}" data-original="${typedStory.replace(/"/g,'&quot;')}" contenteditable="false">${typedStory}</div>` : ''}
+        ${transcriptBlock}${audioBlock}
         <div class="story-fields">
-          <div class="story-field"><strong>Garment / Object</strong>${s.garment_name || '—'}</div>
-          <div class="story-field"><strong>Origin</strong>${s.origin || '—'}</div>
+          <div class="story-field"><strong>Garment / Object</strong><div class="edit-field edit-field-tag" id="field-garment-${s.id}" data-original="${(s.garment_name||'').replace(/"/g,'&quot;')}" contenteditable="false">${s.garment_name || ''}</div></div>
+          <div class="story-field"><strong>Origin</strong><div class="edit-field edit-field-tag" id="field-origin-${s.id}" data-original="${(s.origin||'').replace(/"/g,'&quot;')}" contenteditable="false">${s.origin || ''}</div></div>
           <div class="story-field"><strong>Consent</strong>${s.consent_platform ? 'Yes' : 'No'}</div>
         </div>
       </div>
@@ -1015,6 +1044,65 @@
       renderPending(); renderApproved();
       closeCropModal();
     }, 'image/jpeg', 0.85);
+  };
+
+  // ── EDIT TEXT ──
+  window.startEditText = (id) => {
+    ['story', 'garment', 'origin'].forEach(key => {
+      const el = document.getElementById(`field-${key}-${id}`);
+      if (!el) return;
+      el.contentEditable = 'true';
+      el.classList.add('editing');
+    });
+    document.getElementById(`edit-btn-${id}`).style.display = 'none';
+    document.getElementById(`save-btn-${id}`).style.display = 'inline-block';
+    document.getElementById(`cancel-btn-${id}`).style.display = 'inline-block';
+  };
+
+  window.cancelEditText = (id) => {
+    ['story', 'garment', 'origin'].forEach(key => {
+      const el = document.getElementById(`field-${key}-${id}`);
+      if (!el) return;
+      el.innerText = el.dataset.original || '';
+      el.contentEditable = 'false';
+      el.classList.remove('editing');
+    });
+    document.getElementById(`edit-btn-${id}`).style.display = 'inline-block';
+    document.getElementById(`save-btn-${id}`).style.display = 'none';
+    document.getElementById(`cancel-btn-${id}`).style.display = 'none';
+  };
+
+  window.saveText = async (id) => {
+    const storyEl   = document.getElementById(`field-story-${id}`);
+    const garmentEl = document.getElementById(`field-garment-${id}`);
+    const originEl  = document.getElementById(`field-origin-${id}`);
+
+    const newStory   = storyEl ? storyEl.innerText.trim() : '';
+    const newGarment = garmentEl ? garmentEl.innerText.trim() : '';
+    const newOrigin  = originEl ? originEl.innerText.trim() : '';
+
+    const saveBtn = document.getElementById(`save-btn-${id}`);
+    const originalLabel = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const { error } = await supabase
+      .from('stories')
+      .update({ memory_story: newStory, garment_name: newGarment, origin: newOrigin })
+      .eq('id', id);
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalLabel;
+
+    if (error) {
+      alert('Error saving text. Try again.');
+      return;
+    }
+
+    allStories = allStories.map(s => s.id === id
+      ? { ...s, memory_story: newStory, garment_name: newGarment, origin: newOrigin }
+      : s);
+    renderPending(); renderApproved(); renderRemoved();
   };
 
   window.uploadStoryPhoto = async (id, input) => {
