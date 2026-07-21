@@ -729,7 +729,7 @@
     btn.disabled = true;
     btn.textContent = 'Sending...';
 
-    const { data, error } = await supabase.functions.invoke('send-approval-email', {
+    const { data, error } = await supabase.functions.invoke('dynamic-function', {
       body: { email, storyId: id }
     });
 
