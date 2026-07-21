@@ -324,6 +324,38 @@
     }
     .btn-photo:hover { background: #f5f5f5; }
     .btn-photo:disabled { opacity: 0.5; cursor: wait; }
+
+    .crop-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 999; align-items: center; justify-content: center;
+    }
+    .crop-overlay.open { display: flex; }
+    .crop-modal {
+      background: #fff; border-radius: 10px; padding: 24px;
+      width: 92%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+    }
+    .crop-modal-title {
+      font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 1rem;
+      margin-bottom: 16px; color: #111;
+    }
+    .crop-stage {
+      width: 100%; background: #eee; border-radius: 6px; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      touch-action: none; cursor: grab;
+    }
+    .crop-stage:active { cursor: grabbing; }
+    .crop-stage canvas { display: block; }
+    .crop-controls { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .crop-control-row { display: flex; align-items: center; gap: 12px; }
+    .crop-control-row label {
+      font-family: Arial, Helvetica, sans-serif; font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #666; width: 90px; flex-shrink: 0;
+    }
+    .crop-control-row select, .crop-control-row input[type=range] { flex: 1; }
+    .crop-hint {
+      font-family: Arial, Helvetica, sans-serif; font-size: 0.7rem; color: #999; font-style: italic;
+    }
+    .crop-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; }
     .photo-input { display: none; }
 
     /* ── MEMBERS ── */
@@ -425,6 +457,10 @@
       <span class="nav-icon">✓</span> Approved
       <span class="nav-count" id="count-approved">—</span>
     </div>
+    <div class="nav-item" onclick="switchPanel('removed')">
+      <span class="nav-icon">↺</span> Recently Removed
+      <span class="nav-count" id="count-removed">—</span>
+    </div>
 
     <div class="sidebar-section-label">Community</div>
     <div class="nav-item" onclick="switchPanel('members')">
@@ -469,6 +505,13 @@
         <div class="empty" id="approved-empty" style="display:none;">No approved stories yet</div>
       </div>
 
+      <div class="panel" id="panel-removed">
+        <div class="panel-title">Recently Removed</div>
+        <div class="panel-note">Taken off the live archive — restore anytime, nothing is deleted</div>
+        <div id="removed-list"></div>
+        <div class="empty" id="removed-empty" style="display:none;">Nothing removed yet</div>
+      </div>
+
       <div class="panel" id="panel-members">
         <div class="panel-title">Members & Subscribers</div>
         <div class="panel-note">Everyone who has joined or signed up for updates</div>
@@ -496,6 +539,35 @@
         <div class="empty" id="completed-orders-empty" style="display:none;">No completed orders yet</div>
       </div>
 
+    </div>
+  </div>
+
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-modal">
+      <div class="crop-modal-title">Crop Photo</div>
+      <div class="crop-stage" id="cropStage">
+        <canvas id="cropCanvas"></canvas>
+      </div>
+      <div class="crop-controls">
+        <div class="crop-control-row">
+          <label>Aspect ratio</label>
+          <select id="cropAspect" onchange="onCropAspectChange()">
+            <option value="0.8">Portrait (4:5)</option>
+            <option value="1">Square (1:1)</option>
+            <option value="1.2">Landscape (6:5)</option>
+            <option value="0">Original photo</option>
+          </select>
+        </div>
+        <div class="crop-control-row">
+          <label>Zoom</label>
+          <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" oninput="onCropZoomChange()"/>
+        </div>
+        <div class="crop-hint">Drag the photo to reposition it</div>
+      </div>
+      <div class="crop-actions">
+        <button class="btn-remove" onclick="closeCropModal()">Cancel</button>
+        <button class="btn-approve" id="cropSaveBtn" onclick="saveCrop()">Save Crop</button>
+      </div>
     </div>
   </div>
 
@@ -527,17 +599,19 @@
     allStories = stories || [];
     allMembers = members || [];
     allOrders  = orders  || [];
-    renderPending(); renderApproved(); renderMembers(); renderOrders(); renderCompletedOrders(); updateCounts();
+    renderPending(); renderApproved(); renderRemoved(); renderMembers(); renderOrders(); renderCompletedOrders(); updateCounts();
   };
 
   function updateCounts() {
     const p = allStories.filter(s => s.status === 'pending' || !s.status).length;
     const a = allStories.filter(s => s.status === 'approved').length;
+    const r = allStories.filter(s => s.status === 'removed').length;
     const m = allMembers.length;
     const o = allOrders.filter(o => !o.completed).length;
     const c = allOrders.filter(o => o.completed).length;
     document.getElementById('count-pending').textContent  = p;
     document.getElementById('count-approved').textContent = a;
+    document.getElementById('count-removed').textContent  = r;
     document.getElementById('count-members').textContent  = m;
     document.getElementById('count-orders').textContent   = o;
     document.getElementById('count-completed-orders').textContent = c;
@@ -571,7 +645,7 @@
 
     const liveBadge  = type === 'approved'
       ? `<span class="status-badge">Live</span>`
-      : `<span class="pending-badge">Pending</span>`;
+      : (type === 'removed' ? `<span class="pending-badge">Removed</span>` : `<span class="pending-badge">Pending</span>`);
     const voiceBadge = voiceUrl ? `<span class="voice-badge">🎙 Voice</span>` : '';
 
     const storyBlock = typedStory ? `<div class="story-text">${typedStory}</div>` : '';
@@ -588,11 +662,19 @@
          <button class="btn-photo" id="photo-btn-${s.id}" onclick="document.getElementById('photo-input-${s.id}').click()">${imgSrc ? 'Change Photo' : 'Add Photo'}</button>`
       : '';
 
+    const cropButton = imgSrc
+      ? `<button class="btn-photo" onclick="openCropModal('${s.id}', '${imgSrc}')">Crop Photo</button>`
+      : '';
+
     const actions = type === 'pending'
-      ? `${photoInput}
+      ? `${photoInput}${cropButton}
          <button class="btn-approve" onclick="approveStory('${s.id}', '${s.name}', '${s.email}')">Approve</button>
          <button class="btn-reject" onclick="rejectStory('${s.id}')">Reject</button>`
-      : `<button class="btn-email" id="email-btn-${s.id}" onclick="sendApprovalEmail('${s.id}', '${s.email}')">Send Approval Email</button>
+      : type === 'removed'
+      ? `${cropButton}
+         <button class="btn-approve" onclick="restoreStory('${s.id}')">Restore to Archive</button>`
+      : `${cropButton}
+         <button class="btn-email" id="email-btn-${s.id}" onclick="sendApprovalEmail('${s.id}', '${s.email}')">Send Approval Email</button>
          <button class="btn-remove" onclick="removeStory('${s.id}')">Remove</button>`;
 
     div.innerHTML = `
@@ -629,6 +711,16 @@
     if (!items.length) { empty.style.display = 'block'; return; }
     empty.style.display = 'none';
     items.forEach(s => list.appendChild(buildCard(s, 'approved')));
+  }
+
+  function renderRemoved() {
+    const list  = document.getElementById('removed-list');
+    const empty = document.getElementById('removed-empty');
+    const items = allStories.filter(s => s.status === 'removed');
+    list.innerHTML = '';
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    items.forEach(s => list.appendChild(buildCard(s, 'removed')));
   }
 
   function renderMembers(filter = '') {
@@ -749,6 +841,182 @@
     }, 3000);
   };
 
+  // ── CROP TOOL ──
+  let cropState = null; // { id, img, canvas, ctx, aspect, baseScale, zoom, offsetX, offsetY, dragging, lastX, lastY }
+
+  window.openCropModal = (id, imgSrc) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.getElementById('cropCanvas');
+      const stage = document.getElementById('cropStage');
+      const stageWidth = Math.min(stage.clientWidth || 400, 400);
+
+      cropState = {
+        id, img, canvas,
+        ctx: canvas.getContext('2d'),
+        aspect: 0.8,
+        zoom: 1,
+        offsetX: 0, offsetY: 0,
+        dragging: false, lastX: 0, lastY: 0
+      };
+
+      document.getElementById('cropAspect').value = '0.8';
+      document.getElementById('cropZoom').value = '1';
+      sizeCropCanvas(stageWidth);
+      resetCropView();
+      drawCrop();
+
+      document.getElementById('cropOverlay').classList.add('open');
+    };
+    img.onerror = () => alert('Could not load that image for cropping.');
+    img.src = imgSrc;
+  };
+
+  function sizeCropCanvas(stageWidth) {
+    const c = cropState;
+    const aspect = c.aspect > 0 ? c.aspect : (c.img.naturalWidth / c.img.naturalHeight);
+    c.canvas.width = stageWidth;
+    c.canvas.height = Math.round(stageWidth / aspect);
+  }
+
+  function resetCropView() {
+    const c = cropState;
+    const cw = c.canvas.width, ch = c.canvas.height;
+    c.baseScale = Math.max(cw / c.img.naturalWidth, ch / c.img.naturalHeight);
+    c.zoom = 1;
+    const scale = c.baseScale;
+    c.offsetX = (cw - c.img.naturalWidth * scale) / 2;
+    c.offsetY = (ch - c.img.naturalHeight * scale) / 2;
+  }
+
+  function drawCrop() {
+    const c = cropState;
+    const scale = c.baseScale * c.zoom;
+    c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height);
+    c.ctx.drawImage(c.img, c.offsetX, c.offsetY, c.img.naturalWidth * scale, c.img.naturalHeight * scale);
+  }
+
+  function clampCropOffsets() {
+    const c = cropState;
+    const scale = c.baseScale * c.zoom;
+    const drawnW = c.img.naturalWidth * scale;
+    const drawnH = c.img.naturalHeight * scale;
+    const minX = c.canvas.width - drawnW;
+    const minY = c.canvas.height - drawnH;
+    c.offsetX = Math.min(0, Math.max(minX, c.offsetX));
+    c.offsetY = Math.min(0, Math.max(minY, c.offsetY));
+  }
+
+  window.onCropAspectChange = () => {
+    if (!cropState) return;
+    const val = parseFloat(document.getElementById('cropAspect').value);
+    cropState.aspect = val;
+    const stage = document.getElementById('cropStage');
+    sizeCropCanvas(Math.min(stage.clientWidth || 400, 400));
+    resetCropView();
+    document.getElementById('cropZoom').value = '1';
+    drawCrop();
+  };
+
+  window.onCropZoomChange = () => {
+    if (!cropState) return;
+    const newZoom = parseFloat(document.getElementById('cropZoom').value);
+    const c = cropState;
+    // zoom toward canvas center
+    const cx = c.canvas.width / 2, cy = c.canvas.height / 2;
+    const oldScale = c.baseScale * c.zoom;
+    const newScale = c.baseScale * newZoom;
+    c.offsetX = cx - ((cx - c.offsetX) * (newScale / oldScale));
+    c.offsetY = cy - ((cy - c.offsetY) * (newScale / oldScale));
+    c.zoom = newZoom;
+    clampCropOffsets();
+    drawCrop();
+  };
+
+  function cropPointerDown(x, y) {
+    if (!cropState) return;
+    cropState.dragging = true;
+    cropState.lastX = x;
+    cropState.lastY = y;
+  }
+  function cropPointerMove(x, y) {
+    if (!cropState || !cropState.dragging) return;
+    const c = cropState;
+    c.offsetX += (x - c.lastX);
+    c.offsetY += (y - c.lastY);
+    c.lastX = x; c.lastY = y;
+    clampCropOffsets();
+    drawCrop();
+  }
+  function cropPointerUp() {
+    if (cropState) cropState.dragging = false;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const stage = document.getElementById('cropStage');
+    if (!stage) return;
+    stage.addEventListener('pointerdown', e => { stage.setPointerCapture(e.pointerId); cropPointerDown(e.clientX, e.clientY); });
+    stage.addEventListener('pointermove', e => cropPointerMove(e.clientX, e.clientY));
+    stage.addEventListener('pointerup', cropPointerUp);
+    stage.addEventListener('pointercancel', cropPointerUp);
+  });
+
+  window.closeCropModal = () => {
+    document.getElementById('cropOverlay').classList.remove('open');
+    cropState = null;
+  };
+
+  window.saveCrop = async () => {
+    if (!cropState) return;
+    const c = cropState;
+    const btn = document.getElementById('cropSaveBtn');
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    // render at a fixed output width, matching the display canvas's aspect ratio
+    const outW = 1080;
+    const outH = Math.round(outW * (c.canvas.height / c.canvas.width));
+    const out = document.createElement('canvas');
+    out.width = outW; out.height = outH;
+    const octx = out.getContext('2d');
+    const ratio = outW / c.canvas.width;
+    const scale = c.baseScale * c.zoom * ratio;
+    octx.drawImage(c.img, c.offsetX * ratio, c.offsetY * ratio, c.img.naturalWidth * scale, c.img.naturalHeight * scale);
+
+    out.toBlob(async (blob) => {
+      const path = `${c.id}-crop-${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('story-images')
+        .upload(path, blob, { cacheControl: '3600', upsert: false, contentType: 'image/jpeg' });
+
+      if (uploadError) {
+        alert('Upload failed. Try again.');
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+        return;
+      }
+
+      const publicUrl = STORAGE_URL + path;
+      const { error: updateError } = await supabase
+        .from('stories')
+        .update({ image_urls: [publicUrl] })
+        .eq('id', c.id);
+
+      if (updateError) {
+        alert('Cropped photo uploaded but saving to the story failed. Try again.');
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+        return;
+      }
+
+      allStories = allStories.map(s => s.id === c.id ? { ...s, image_urls: [publicUrl] } : s);
+      renderPending(); renderApproved();
+      closeCropModal();
+    }, 'image/jpeg', 0.85);
+  };
+
   window.uploadStoryPhoto = async (id, input) => {
     const file = input.files && input.files[0];
     if (!file) return;
@@ -807,11 +1075,19 @@
   };
 
   window.removeStory = async (id) => {
-    if (!confirm('Remove this story from the archive?')) return;
-    const { error } = await supabase.from('stories').update({ status: 'rejected' }).eq('id', id);
+    if (!confirm('Remove this story from the archive? It will move to Recently Removed, where you can restore it later if needed.')) return;
+    const { error } = await supabase.from('stories').update({ status: 'removed' }).eq('id', id);
     if (error) { alert('Error removing. Try again.'); return; }
-    allStories = allStories.map(s => s.id === id ? { ...s, status: 'rejected' } : s);
-    renderApproved(); updateCounts();
+    allStories = allStories.map(s => s.id === id ? { ...s, status: 'removed' } : s);
+    renderApproved(); renderRemoved(); updateCounts();
+  };
+
+  window.restoreStory = async (id) => {
+    if (!confirm('Restore this story to the live archive?')) return;
+    const { error } = await supabase.from('stories').update({ status: 'approved' }).eq('id', id);
+    if (error) { alert('Error restoring. Try again.'); return; }
+    allStories = allStories.map(s => s.id === id ? { ...s, status: 'approved' } : s);
+    renderApproved(); renderRemoved(); updateCounts();
   };
 
   loadAll();
