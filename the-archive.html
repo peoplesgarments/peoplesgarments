@@ -234,7 +234,7 @@ async function loadStories() {
     .order('submitted_at', { ascending: false });
 
   if (error) {
-    console.error('Failed to load stories:', error);
+    console.error('Failed to load stories:', error.message || error);
     return;
   }
 
@@ -243,7 +243,7 @@ async function loadStories() {
     .map(row => ({
       slug: row.id,
       user: row.instagram ? '@' + row.instagram.replace('@', '') : (row.name || 'Anonymous'),
-      likes: 0,
+      likes: row.likes || 0,
       img: row.image_urls[0],
       garment: row.garment_name || '',
       origin: row.origin || '',
@@ -266,19 +266,37 @@ function isLiked(slug) {
   return localStorage.getItem('liked_' + slug) === '1';
 }
 function likeCount(s) {
-  const stored = localStorage.getItem('likes_' + s.slug);
-  return stored !== null ? parseInt(stored, 10) : s.likes;
+  return s.likes || 0;
 }
-function toggleLike(evt, slug) {
+async function toggleLike(evt, slug) {
   if (evt) evt.stopPropagation();
   if (!slug) return;
   const s = stories.find(x => x.slug === slug);
   if (!s) return;
+
   const liked = isLiked(slug);
-  const current = likeCount(s);
-  const next = liked ? Math.max(current - 1, 0) : current + 1;
+  const delta = liked ? -1 : 1;
+
+  // optimistic UI update so the click feels instant
+  s.likes = Math.max((s.likes || 0) + delta, 0);
   localStorage.setItem('liked_' + slug, liked ? '0' : '1');
-  localStorage.setItem('likes_' + slug, String(next));
+  renderStarState(slug);
+
+  const { data, error } = await supabase.rpc('increment_story_likes', {
+    story_id: slug,
+    delta: delta
+  });
+
+  if (error) {
+    // revert on failure
+    s.likes = Math.max((s.likes || 0) - delta, 0);
+    localStorage.setItem('liked_' + slug, liked ? '1' : '0');
+    renderStarState(slug);
+    return;
+  }
+
+  // reconcile with the real server count (in case others liked it meanwhile)
+  s.likes = data;
   renderStarState(slug);
 }
 function renderStarState(slug) {
