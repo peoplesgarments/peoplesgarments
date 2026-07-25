@@ -128,6 +128,45 @@
   .save-dot{ width:5px;height:5px;border-radius:50%; background:var(--green); }
   .save-dot.saving{ background:var(--amber); }
 
+  .tabs-right{
+    display:flex; align-items:center; gap:14px;
+    padding-bottom:11px;
+    position:relative;
+  }
+  .gear-btn{
+    appearance:none; border:none; background:none;
+    color:var(--text-muted); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    padding:4px; border-radius:5px;
+  }
+  .gear-btn:hover{ color:var(--text); background:var(--hover-strong); }
+
+  .color-popover{
+    display:none;
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    background:#fff;
+    border:1px solid var(--border-strong);
+    border-radius:8px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08);
+    padding:14px 16px;
+    width:230px;
+    z-index:50;
+  }
+  .color-popover.open{ display:block; }
+  .popover-title{ font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px; }
+  .popover-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+  .popover-row:last-child{ margin-bottom:0; }
+  .popover-label{ font-size:13px; color:var(--text); }
+  .swatch-picker{ display:flex; gap:5px; }
+  .swatch-opt{
+    width:16px; height:16px; border-radius:50%;
+    cursor:pointer; border:2px solid transparent;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.08);
+  }
+  .swatch-opt.selected{ border-color:var(--text); box-shadow:0 0 0 1px #fff, inset 0 0 0 1px rgba(0,0,0,0.08); }
+
   .toolbar-row{
     display:flex; justify-content:space-between; align-items:center;
     padding:14px 0 12px;
@@ -335,7 +374,18 @@
       <button class="tab" data-panel="production">Production Orders <span class="count" id="count-production">0</span></button>
       <button class="tab" data-panel="summary">Summary</button>
     </div>
-    <div class="save-indicator"><span class="save-dot" id="saveDot"></span><span id="saveText">Saved</span></div>
+    <div class="tabs-right">
+      <button class="gear-btn" id="colorSettingsBtn" title="Customize colors">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="save-indicator"><span class="save-dot" id="saveDot"></span><span id="saveText">Saved</span></div>
+      <div class="color-popover" id="colorPopover">
+        <div class="popover-title">Status colors</div>
+        <div id="popoverStatusColors"></div>
+        <div class="popover-title" style="margin-top:14px;">Item colors</div>
+        <div id="popoverTagColors"></div>
+      </div>
+    </div>
   </div>
 
   <!-- INVENTORY -->
@@ -459,7 +509,19 @@
   try{ supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
   catch(e){ console.error('Supabase init failed, falling back to local storage', e); }
 
-  const KEYS = { inventory:'sacu:inventory', orders:'sacu:orders', production:'sacu:production' };
+  const KEYS = { inventory:'sacu:inventory', orders:'sacu:orders', production:'sacu:production', colors:'sacu:colors' };
+
+  const PALETTE = [
+    {name:'pink',   hex:'#E8578C'},
+    {name:'butter', hex:'#E3BE3F'},
+    {name:'red',    hex:'#DD4B4B'},
+    {name:'green',  hex:'#3DA35D'},
+    {name:'blue',   hex:'#3B82F6'},
+    {name:'purple', hex:'#9165E0'},
+    {name:'orange', hex:'#E38A3C'},
+    {name:'gray',   hex:'#8A8A86'},
+  ];
+  const DEFAULT_COLORS = { status:{ 'In Progress':'#E3BE3F', 'Fulfilled':'#3DA35D' }, tags:{} };
 
   const DEFAULT_INVENTORY = [
     {item:'Clutch', colorway:'Black', price:65},
@@ -478,7 +540,7 @@
   ];
   const DEFAULT_PRODUCTION = [];
 
-  let state = { inventory:[], orders:[], production:[] };
+  let state = { inventory:[], orders:[], production:[], colors:{status:{}, tags:{}} };
   let selected = { inventory:new Set(), orders:new Set(), production:new Set() };
   let saveTimer = null;
 
@@ -495,20 +557,23 @@
 
   async function loadAll(){
     try{
-      const [inv, ord, prod] = await Promise.all([
-        safeGet(KEYS.inventory), safeGet(KEYS.orders), safeGet(KEYS.production)
+      const [inv, ord, prod, cols] = await Promise.all([
+        safeGet(KEYS.inventory), safeGet(KEYS.orders), safeGet(KEYS.production), safeGet(KEYS.colors)
       ]);
       state.inventory = inv || DEFAULT_INVENTORY.map(r=>({id:uid(),...r}));
       state.orders = ord || DEFAULT_ORDERS.map(r=>({id:uid(),...r}));
       state.production = prod || DEFAULT_PRODUCTION.map(r=>({id:uid(),...r}));
+      state.colors = cols || JSON.parse(JSON.stringify(DEFAULT_COLORS));
       if(!inv) await persist('inventory');
       if(!ord) await persist('orders');
       if(!prod) await persist('production');
+      if(!cols) await persist('colors');
     }catch(e){
       console.error('Load failed, using defaults', e);
       state.inventory = DEFAULT_INVENTORY.map(r=>({id:uid(),...r}));
       state.orders = DEFAULT_ORDERS.map(r=>({id:uid(),...r}));
       state.production = DEFAULT_PRODUCTION.map(r=>({id:uid(),...r}));
+      state.colors = JSON.parse(JSON.stringify(DEFAULT_COLORS));
     }
     renderAll();
   }
@@ -555,16 +620,17 @@
     return '$' + Number(n).toLocaleString(undefined,{minimumFractionDigits:0, maximumFractionDigits:2});
   }
 
-  /* stable color per tag name — notion-style palette */
-  const TAG_COLORS = [
-    {dot:'#2383E2'}, {dot:'#8B5CF6'}, {dot:'#E8590C'}, {dot:'#2F855A'},
-    {dot:'#C2408B'}, {dot:'#B7791F'}, {dot:'#6B6B68'}, {dot:'#C0392B'},
-  ];
+  /* stable color per tag name — overridable via state.colors.tags, falls back to a hash pick */
   function colorFor(name){
     const s = String(name||'');
+    if(state.colors.tags[s]) return {dot: state.colors.tags[s]};
     let h = 0;
     for(let i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) >>> 0; }
-    return TAG_COLORS[h % TAG_COLORS.length];
+    return {dot: PALETTE[h % PALETTE.length].hex};
+  }
+
+  function statusColorHex(status){
+    return (state.colors.status && state.colors.status[status]) || DEFAULT_COLORS.status[status] || '#8A8A86';
   }
 
   function dotRowHTML(value){
@@ -700,13 +766,14 @@
 
       const tdStatus = document.createElement('td');
       const sel = document.createElement('select');
-      sel.className = 'status-select ' + (row.status==='Fulfilled' ? 'fulfilled' : 'progress');
+      sel.className = 'status-select';
+      sel.style.color = statusColorHex(row.status);
       ['In Progress','Fulfilled'].forEach(opt=>{
         const o = document.createElement('option'); o.value=opt; o.textContent=opt;
         if(row.status===opt) o.selected=true;
         sel.appendChild(o);
       });
-      sel.addEventListener('change', ()=>{ row.status = sel.value; sel.className='status-select '+(row.status==='Fulfilled'?'fulfilled':'progress'); persist('orders'); renderSummary(); });
+      sel.addEventListener('change', ()=>{ row.status = sel.value; sel.style.color = statusColorHex(row.status); persist('orders'); renderSummary(); });
       tdStatus.appendChild(sel);
       tr.appendChild(tdStatus);
 
@@ -806,8 +873,8 @@
         <td><div class="cell-inner">${dotRowHTML(s.item)}</div></td>
         <td><div class="cell-inner">${s.colorway}</div></td>
         <td><div class="cell-inner">${s.units}</div></td>
-        <td><div class="cell-inner"><span class="status-pill status-fulfilled">${s.fulfilled}</span></div></td>
-        <td><div class="cell-inner"><span class="status-pill status-progress">${s.progress}</span></div></td>
+        <td><div class="cell-inner"><span class="status-pill" style="color:${statusColorHex('Fulfilled')}">${s.fulfilled}</span></div></td>
+        <td><div class="cell-inner"><span class="status-pill" style="color:${statusColorHex('In Progress')}">${s.progress}</span></div></td>
         <td><div class="cell-inner">${fmtMoney(s.revenue)}</div></td>
       </tr>
     `).join('') || `<tr><td colspan="6"><div class="empty-state">Add inventory items to see totals here.</div></td></tr>`;
@@ -823,7 +890,58 @@
     renderOrders();
     renderProduction();
     renderSummary();
+    renderColorPopover();
   }
+
+  /* ---------- color customization popover ---------- */
+  function swatchPickerHTML(currentHex, onPickAttr){
+    return PALETTE.map(p => `<span class="swatch-opt ${p.hex.toLowerCase()===String(currentHex).toLowerCase()?'selected':''}" style="background:${p.hex}" data-hex="${p.hex}" ${onPickAttr}></span>`).join('');
+  }
+
+  function renderColorPopover(){
+    const statusBox = $('#popoverStatusColors');
+    const tagBox = $('#popoverTagColors');
+    if(!statusBox || !tagBox) return;
+
+    statusBox.innerHTML = ['In Progress','Fulfilled'].map(status => `
+      <div class="popover-row">
+        <span class="popover-label">${status}</span>
+        <span class="swatch-picker" data-kind="status" data-key="${status}">${swatchPickerHTML(statusColorHex(status))}</span>
+      </div>
+    `).join('');
+
+    const uniqueItems = [...new Set(state.inventory.map(r=>r.item).filter(Boolean))];
+    tagBox.innerHTML = uniqueItems.length ? uniqueItems.map(item => `
+      <div class="popover-row">
+        <span class="popover-label">${item}</span>
+        <span class="swatch-picker" data-kind="tag" data-key="${item}">${swatchPickerHTML(colorFor(item).dot)}</span>
+      </div>
+    `).join('') : `<div class="popover-row"><span class="popover-label" style="color:var(--text-faint);">Add items in Inventory</span></div>`;
+
+    $$('.swatch-picker').forEach(picker=>{
+      const kind = picker.dataset.kind, key = picker.dataset.key;
+      picker.querySelectorAll('.swatch-opt').forEach(opt=>{
+        opt.addEventListener('click', ()=>{
+          const hex = opt.dataset.hex;
+          if(kind==='status'){ state.colors.status[key] = hex; }
+          else { state.colors.tags[key] = hex; }
+          persist('colors');
+          renderOrders(); renderInventory(); renderSummary(); renderColorPopover();
+        });
+      });
+    });
+  }
+
+  $('#colorSettingsBtn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    $('#colorPopover').classList.toggle('open');
+  });
+  document.addEventListener('click', (e)=>{
+    const pop = $('#colorPopover');
+    if(pop.classList.contains('open') && !pop.contains(e.target) && e.target.id!=='colorSettingsBtn'){
+      pop.classList.remove('open');
+    }
+  });
 
   /* tabs */
   $$('.tab').forEach(tab=>{
