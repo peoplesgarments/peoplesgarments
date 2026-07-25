@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACU — Admin</title>
+<style>
+  :root{
+    --text:#37352F;
+    --text-muted:#9B9A97;
+    --text-faint:#C9C8C5;
+    --border:rgba(55,53,47,0.09);
+    --border-strong:rgba(55,53,47,0.16);
+    --hover:rgba(55,53,47,0.035);
+    --hover-strong:rgba(55,53,47,0.06);
+    --blue:#2383E2;
+    --green:#2F855A;
+    --green-bg:#EDF6EE;
+    --amber:#B7791F;
+    --amber-bg:#FBF3E4;
+    --red:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#ffffff;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:48px 40px 100px;
+  }
+
+  /* breadcrumb */
+  .crumb{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    color:var(--text-muted);
+    margin-bottom:22px;
+  }
+  .crumb .mark{ color:var(--text); font-size:13px; }
+  .crumb .sep{ color:var(--text-faint); }
+  .crumb .current{ color:var(--text); }
+  .crumb a{ color:var(--text-muted); cursor:default; }
+
+  .private-label{
+    display:flex; align-items:center; gap:6px;
+    font-size:12px; color:var(--text-muted);
+    margin-bottom:10px;
+  }
+  .private-label svg{opacity:.65;}
+
+  h1{
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:-0.015em;
+    margin:0 0 10px;
+    color:var(--text);
+  }
+  .subtitle{
+    font-size:14.5px;
+    color:var(--text-muted);
+    margin:0 0 34px;
+    max-width:640px;
+    line-height:1.6;
+  }
+
+  .section-label{
+    font-size:15px;
+    font-weight:600;
+    color:var(--text);
+    margin:0 0 14px;
+  }
+
+  /* tabs */
+  .tabs{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--border);
+    margin-bottom:0;
+  }
+  .tabs-left{display:flex; gap:22px;}
+  .tab{
+    appearance:none;
+    border:none;
+    background:none;
+    font-family:inherit;
+    font-size:14px;
+    color:var(--text-muted);
+    padding:0 0 11px;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .tab .count{
+    font-size:12px;
+    color:var(--text-faint);
+  }
+  .tab.active{ color:var(--text); font-weight:600; border-bottom-color:var(--text); }
+  .tab.active .count{ color:var(--text-muted); }
+  .tab:hover:not(.active){ color:var(--text); }
+
+  .new-btn{
+    appearance:none; border:none; background:none;
+    font-family:inherit; font-size:13px; color:var(--text-muted);
+    cursor:pointer; display:flex; align-items:center; gap:5px;
+    padding:0 0 11px;
+  }
+  .new-btn:hover{ color:var(--text); }
+
+  .save-indicator{
+    font-size:11.5px;
+    color:var(--text-faint);
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .save-dot{ width:5px;height:5px;border-radius:50%; background:var(--green); }
+  .save-dot.saving{ background:var(--amber); }
+
+  .toolbar-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0 12px;
+  }
+  .toolbar-hint{ font-size:12.5px; color:var(--text-muted); }
+  .delete-link{
+    appearance:none; border:none; background:none;
+    font-family:inherit; font-size:12.5px; color:var(--red);
+    cursor:pointer; opacity:0; pointer-events:none;
+  }
+  .delete-link.show{ opacity:1; pointer-events:auto; }
+  .delete-link:hover{ text-decoration:underline; }
+
+  /* table */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+  }
+  thead th{
+    text-align:left;
+    font-size:12px;
+    font-weight:500;
+    color:var(--text-muted);
+    padding:7px 10px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th .th-inner{ display:flex; align-items:center; gap:6px; }
+  thead th svg{ opacity:.6; flex:none; }
+  th.chk-col{ width:32px; }
+  th.del-col{ width:28px; }
+
+  tbody tr{ border-bottom:1px solid var(--border); }
+  tbody tr:last-child{ border-bottom:1px solid var(--border); }
+  tbody tr:hover{ background:var(--hover); }
+  tbody td{ padding:0; vertical-align:middle; }
+  td.chk-col{ width:32px; text-align:center; }
+
+  input[type="checkbox"]{
+    width:15px;height:15px;
+    accent-color:var(--text);
+    opacity:0;
+    cursor:pointer;
+  }
+  tr:hover input[type="checkbox"]{ opacity:.55; }
+  input[type="checkbox"]:checked{ opacity:1; }
+
+  .cell-inner{
+    padding:9px 10px;
+    outline:none;
+    min-height:36px;
+    display:flex;
+    align-items:center;
+    color:var(--text);
+    border-radius:4px;
+  }
+  .cell-inner[contenteditable="true"]:hover{ background:var(--hover-strong); }
+  .cell-inner[contenteditable="true"]:focus{
+    background:#fff;
+    box-shadow:0 0 0 2px var(--blue);
+  }
+  .cell-inner.computed{ color:var(--text-muted); }
+  .cell-inner.empty::before{ content:attr(data-placeholder); color:var(--text-faint); }
+
+  select.status-select{
+    border:none; background:none;
+    font-family:inherit; font-size:13.5px; font-weight:500;
+    padding:9px 10px; width:100%; cursor:pointer;
+  }
+  select.status-select.fulfilled{ color:var(--green); }
+  select.status-select.progress{ color:var(--amber); }
+
+  .status-pill{ display:inline-flex; align-items:center; gap:6px; font-weight:500; }
+  .status-pill svg{flex:none;}
+  .status-fulfilled{ color:var(--green); }
+  .status-progress{ color:var(--amber); }
+
+  .dot-row{ display:flex; align-items:center; gap:8px; }
+  .dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+
+  .row-del{
+    border:none; background:none; color:var(--text-faint);
+    cursor:pointer; font-size:14px; line-height:1;
+    padding:4px 8px; opacity:0;
+  }
+  tbody tr:hover .row-del{ opacity:1; }
+  .row-del:hover{ color:var(--red); }
+
+  .add-row{
+    padding:9px 10px;
+    font-size:13.5px;
+    color:var(--text-faint);
+    cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .add-row:hover{ color:var(--text-muted); background:var(--hover); border-radius:4px; }
+
+  /* summary */
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:36px;
+  }
+  .stat-card{ background:#fff; padding:18px 20px; }
+  .stat-label{ font-size:12px; color:var(--text-muted); margin-bottom:8px; }
+  .stat-value{ font-size:26px; font-weight:700; letter-spacing:-0.01em; }
+  .stat-value.amber{ color:var(--amber); }
+  .stat-value.green{ color:var(--green); }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .empty-state{ padding:36px 10px; text-align:center; color:var(--text-muted); font-size:13px; }
+
+  @media (max-width:720px){
+    .wrap{ padding:28px 18px 70px; }
+    .summary-grid{ grid-template-columns:repeat(2,1fr); }
+    h1{ font-size:26px; }
+    table{ display:block; overflow-x:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">
+    <span class="mark">✦</span>
+    <a>SACU</a><span class="sep">/</span><span class="current">Admin</span>
+  </div>
+
+  <div class="private-label">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    Private Database
+  </div>
+
+  <h1>SACU — Admin</h1>
+  <p class="subtitle">Manual database for the SACU line — inventory, customer orders, production purchases, and running totals.</p>
+
+  <div class="section-label">Order Overview</div>
+
+  <div class="tabs">
+    <div class="tabs-left">
+      <button class="tab active" data-panel="inventory">Inventory <span class="count" id="count-inventory">0</span></button>
+      <button class="tab" data-panel="orders">Orders <span class="count" id="count-orders">0</span></button>
+      <button class="tab" data-panel="production">Production Orders <span class="count" id="count-production">0</span></button>
+      <button class="tab" data-panel="summary">Summary</button>
+    </div>
+    <div class="save-indicator"><span class="save-dot" id="saveDot"></span><span id="saveText">Saved</span></div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="panel active" id="panel-inventory">
+    <div class="toolbar-row">
+      <div class="toolbar-hint">Item styles and prices — Orders looks up prices from here.</div>
+      <button class="delete-link" id="delInventory">Delete selected</button>
+    </div>
+    <table id="table-inventory">
+      <thead><tr>
+        <th class="chk-col"></th>
+        <th><div class="th-inner">Item</div></th>
+        <th><div class="th-inner">Colorway</div></th>
+        <th><div class="th-inner">Price</div></th>
+        <th class="del-col"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="add-row" data-add="inventory">+ New</div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="panel" id="panel-orders">
+    <div class="toolbar-row">
+      <div class="toolbar-hint">Item Price and Total calculate automatically from Inventory.</div>
+      <button class="delete-link" id="delOrders">Delete selected</button>
+    </div>
+    <table id="table-orders">
+      <thead><tr>
+        <th class="chk-col"></th>
+        <th><div class="th-inner">Customer</div></th>
+        <th><div class="th-inner">Item</div></th>
+        <th><div class="th-inner">Colorway</div></th>
+        <th><div class="th-inner">Item Price</div></th>
+        <th><div class="th-inner">Shipping</div></th>
+        <th><div class="th-inner">Total</div></th>
+        <th><div class="th-inner">Date Ordered</div></th>
+        <th><div class="th-inner">Shipping Address</div></th>
+        <th><div class="th-inner">Status</div></th>
+        <th class="del-col"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="add-row" data-add="orders">+ New</div>
+  </div>
+
+  <!-- PRODUCTION ORDERS -->
+  <div class="panel" id="panel-production">
+    <div class="toolbar-row">
+      <div class="toolbar-hint">What you've purchased to produce SACU pieces.</div>
+      <button class="delete-link" id="delProduction">Delete selected</button>
+    </div>
+    <table id="table-production">
+      <thead><tr>
+        <th class="chk-col"></th>
+        <th><div class="th-inner">Date Purchased</div></th>
+        <th><div class="th-inner">Item / Material</div></th>
+        <th><div class="th-inner">Quantity</div></th>
+        <th><div class="th-inner">Price</div></th>
+        <th><div class="th-inner">Vendor</div></th>
+        <th><div class="th-inner">Notes</div></th>
+        <th class="del-col"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="add-row" data-add="production">+ New</div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="panel" id="panel-summary">
+    <div class="summary-grid" id="summaryStats"></div>
+    <div class="section-label">Units sold by style</div>
+    <table>
+      <thead><tr>
+        <th>Item</th><th>Colorway</th><th>Units Ordered</th><th>Fulfilled</th><th>In Progress</th><th>Revenue</th>
+      </tr></thead>
+      <tbody id="summaryByStyle"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const KEYS = { inventory:'sacu:inventory', orders:'sacu:orders', production:'sacu:production' };
+
+  const DEFAULT_INVENTORY = [
+    {item:'Clutch', colorway:'Black', price:65},
+    {item:'Clutch', colorway:'Cream', price:65},
+    {item:'Pouch', colorway:'Black', price:35},
+    {item:'Pouch', colorway:'Cream', price:35},
+  ];
+  const DEFAULT_ORDERS = [
+    {customer:'Penda', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'Syd', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'Baiyina', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'Sumaya', item:'Clutch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'Fatima', item:'Clutch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'', item:'Pouch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'', item:'Pouch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+  ];
+  const DEFAULT_PRODUCTION = [];
+
+  let state = { inventory:[], orders:[], production:[] };
+  let selected = { inventory:new Set(), orders:new Set(), production:new Set() };
+  let saveTimer = null;
+
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  function uid(){ return 'r'+Math.random().toString(36).slice(2,10); }
+
+  function setSaveState(saving){
+    const dot = $('#saveDot'), text = $('#saveText');
+    if(saving){ dot.classList.add('saving'); text.textContent='Saving…'; }
+    else { dot.classList.remove('saving'); text.textContent='Saved'; }
+  }
+
+  async function loadAll(){
+    try{
+      const [inv, ord, prod] = await Promise.all([
+        safeGet(KEYS.inventory), safeGet(KEYS.orders), safeGet(KEYS.production)
+      ]);
+      state.inventory = inv || DEFAULT_INVENTORY.map(r=>({id:uid(),...r}));
+      state.orders = ord || DEFAULT_ORDERS.map(r=>({id:uid(),...r}));
+      state.production = prod || DEFAULT_PRODUCTION.map(r=>({id:uid(),...r}));
+      if(!inv) await persist('inventory');
+      if(!ord) await persist('orders');
+      if(!prod) await persist('production');
+    }catch(e){
+      console.error('Load failed, using defaults', e);
+      state.inventory = DEFAULT_INVENTORY.map(r=>({id:uid(),...r}));
+      state.orders = DEFAULT_ORDERS.map(r=>({id:uid(),...r}));
+      state.production = DEFAULT_PRODUCTION.map(r=>({id:uid(),...r}));
+    }
+    renderAll();
+  }
+
+  async function safeGet(key){
+    try{
+      const res = await window.storage.get(key, false);
+      if(!res) return null;
+      return JSON.parse(res.value);
+    }catch(e){ return null; }
+  }
+
+  async function persist(which){
+    setSaveState(true);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async ()=>{
+      try{ await window.storage.set(KEYS[which], JSON.stringify(state[which]), false); }
+      catch(e){ console.error('Save failed', e); }
+      setSaveState(false);
+    }, 350);
+  }
+
+  function priceLookup(item, colorway){
+    const hit = state.inventory.find(r => (r.item||'').toLowerCase()===String(item||'').toLowerCase() && (r.colorway||'').toLowerCase()===String(colorway||'').toLowerCase());
+    return hit ? Number(hit.price)||0 : null;
+  }
+
+  function fmtMoney(n){
+    if(n===null || n===undefined || n==='' || isNaN(n)) return '—';
+    return '$' + Number(n).toLocaleString(undefined,{minimumFractionDigits:0, maximumFractionDigits:2});
+  }
+
+  /* stable color per tag name — notion-style palette */
+  const TAG_COLORS = [
+    {dot:'#2383E2'}, {dot:'#8B5CF6'}, {dot:'#E8590C'}, {dot:'#2F855A'},
+    {dot:'#C2408B'}, {dot:'#B7791F'}, {dot:'#6B6B68'}, {dot:'#C0392B'},
+  ];
+  function colorFor(name){
+    const s = String(name||'');
+    let h = 0;
+    for(let i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) >>> 0; }
+    return TAG_COLORS[h % TAG_COLORS.length];
+  }
+
+  function dotRowHTML(value){
+    if(!value) return '';
+    const c = colorFor(value);
+    return `<span class="dot-row"><span class="dot" style="background:${c.dot}"></span><span>${value}</span></span>`;
+  }
+
+  function statusIconSVG(fulfilled){
+    if(fulfilled){
+      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`;
+    }
+    return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>`;
+  }
+
+  /* ---------- editable cell helper ---------- */
+  function editableCell(value, onCommit, placeholder){
+    const div = document.createElement('div');
+    div.className = 'cell-inner';
+    div.contentEditable = 'true';
+    div.textContent = value || '';
+    if(!value){ div.classList.add('empty'); div.setAttribute('data-placeholder', placeholder||'Empty'); }
+    div.addEventListener('focus', ()=> div.classList.remove('empty'));
+    div.addEventListener('blur', ()=>{
+      const v = div.textContent.trim();
+      if(!v){ div.classList.add('empty'); div.setAttribute('data-placeholder', placeholder||'Empty'); }
+      onCommit(v);
+    });
+    div.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); div.blur(); } });
+    return div;
+  }
+
+  function computedCell(text){
+    const div = document.createElement('div');
+    div.className = 'cell-inner computed';
+    div.textContent = text;
+    return div;
+  }
+
+  /* ---------- INVENTORY ---------- */
+  function renderInventory(){
+    const tbody = $('#table-inventory tbody');
+    tbody.innerHTML = '';
+    state.inventory.forEach(row=>{
+      const tr = document.createElement('tr');
+
+      const chk = document.createElement('td'); chk.className='chk-col';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = selected.inventory.has(row.id);
+      cb.addEventListener('change', ()=>{ cb.checked ? selected.inventory.add(row.id) : selected.inventory.delete(row.id); updateDeleteBtn('inventory'); });
+      chk.appendChild(cb); tr.appendChild(chk);
+
+      const tdItem = document.createElement('td');
+      const itemInner = document.createElement('div');
+      itemInner.className='cell-inner'; itemInner.contentEditable='true';
+      itemInner.innerHTML = dotRowHTML(row.item) || '';
+      if(!row.item){ itemInner.classList.add('empty'); itemInner.setAttribute('data-placeholder','Item'); }
+      itemInner.addEventListener('focus', ()=>{ itemInner.classList.remove('empty'); itemInner.textContent = row.item||''; });
+      itemInner.addEventListener('blur', ()=>{ row.item = itemInner.textContent.trim(); persist('inventory'); renderInventory(); renderOrders(); renderSummary(); });
+      itemInner.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); itemInner.blur(); } });
+      tdItem.appendChild(itemInner); tr.appendChild(tdItem);
+
+      const tdColor = document.createElement('td');
+      tdColor.appendChild(editableCell(row.colorway, v=>{ row.colorway=v; persist('inventory'); renderOrders(); renderSummary(); }, 'Colorway'));
+      tr.appendChild(tdColor);
+
+      const tdPrice = document.createElement('td');
+      tdPrice.appendChild(editableCell(row.price!==undefined && row.price!=='' ? String(row.price) : '', v=>{ row.price = parseFloat(v)||0; persist('inventory'); renderOrders(); renderSummary(); }, '0'));
+      tr.appendChild(tdPrice);
+
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button'); delBtn.className='row-del'; delBtn.textContent='✕';
+      delBtn.addEventListener('click', ()=>{ state.inventory = state.inventory.filter(r=>r.id!==row.id); selected.inventory.delete(row.id); persist('inventory'); renderInventory(); renderOrders(); renderSummary(); });
+      tdDel.appendChild(delBtn); tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+    $('#count-inventory').textContent = state.inventory.length;
+    updateDeleteBtn('inventory');
+  }
+
+  /* ---------- ORDERS ---------- */
+  function renderOrders(){
+    const tbody = $('#table-orders tbody');
+    tbody.innerHTML = '';
+    state.orders.forEach(row=>{
+      const tr = document.createElement('tr');
+
+      const chk = document.createElement('td'); chk.className='chk-col';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = selected.orders.has(row.id);
+      cb.addEventListener('change', ()=>{ cb.checked ? selected.orders.add(row.id) : selected.orders.delete(row.id); updateDeleteBtn('orders'); });
+      chk.appendChild(cb); tr.appendChild(chk);
+
+      const tdCust = document.createElement('td');
+      tdCust.appendChild(editableCell(row.customer, v=>{ row.customer=v; persist('orders'); }, 'Name'));
+      tr.appendChild(tdCust);
+
+      const tdItem = document.createElement('td');
+      const itemInner = document.createElement('div');
+      itemInner.className='cell-inner'; itemInner.contentEditable='true';
+      itemInner.innerHTML = dotRowHTML(row.item) || '';
+      if(!row.item){ itemInner.classList.add('empty'); itemInner.setAttribute('data-placeholder','Item'); }
+      itemInner.addEventListener('focus', ()=>{ itemInner.classList.remove('empty'); itemInner.textContent = row.item||''; });
+      itemInner.addEventListener('blur', ()=>{ row.item = itemInner.textContent.trim(); persist('orders'); renderOrders(); renderSummary(); });
+      itemInner.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); itemInner.blur(); } });
+      tdItem.appendChild(itemInner); tr.appendChild(tdItem);
+
+      const tdColor = document.createElement('td');
+      tdColor.appendChild(editableCell(row.colorway, v=>{ row.colorway=v; persist('orders'); renderOrders(); renderSummary(); }, 'Colorway'));
+      tr.appendChild(tdColor);
+
+      const price = priceLookup(row.item, row.colorway);
+      const tdPrice = document.createElement('td');
+      tdPrice.appendChild(computedCell(price===null ? '—' : fmtMoney(price)));
+      tr.appendChild(tdPrice);
+
+      const tdShip = document.createElement('td');
+      tdShip.appendChild(editableCell(row.shipping!==undefined && row.shipping!=='' ? String(row.shipping) : '', v=>{ row.shipping = v===''? '': (parseFloat(v)||0); persist('orders'); renderOrders(); renderSummary(); }, '0.00'));
+      tr.appendChild(tdShip);
+
+      const shippingNum = row.shipping===''||row.shipping===undefined ? 0 : Number(row.shipping);
+      const total = price===null ? null : price + shippingNum;
+      const tdTotal = document.createElement('td');
+      tdTotal.appendChild(computedCell(total===null ? '—' : fmtMoney(total)));
+      tr.appendChild(tdTotal);
+
+      const tdDate = document.createElement('td');
+      tdDate.appendChild(editableCell(row.dateOrdered, v=>{ row.dateOrdered=v; persist('orders'); }, 'MM/DD/YYYY'));
+      tr.appendChild(tdDate);
+
+      const tdAddr = document.createElement('td');
+      tdAddr.appendChild(editableCell(row.address, v=>{ row.address=v; persist('orders'); }, 'Shipping address'));
+      tr.appendChild(tdAddr);
+
+      const tdStatus = document.createElement('td');
+      const sel = document.createElement('select');
+      sel.className = 'status-select ' + (row.status==='Fulfilled' ? 'fulfilled' : 'progress');
+      ['In Progress','Fulfilled'].forEach(opt=>{
+        const o = document.createElement('option'); o.value=opt; o.textContent=opt;
+        if(row.status===opt) o.selected=true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change', ()=>{ row.status = sel.value; sel.className='status-select '+(row.status==='Fulfilled'?'fulfilled':'progress'); persist('orders'); renderSummary(); });
+      tdStatus.appendChild(sel);
+      tr.appendChild(tdStatus);
+
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button'); delBtn.className='row-del'; delBtn.textContent='✕';
+      delBtn.addEventListener('click', ()=>{ state.orders = state.orders.filter(r=>r.id!==row.id); selected.orders.delete(row.id); persist('orders'); renderOrders(); renderSummary(); });
+      tdDel.appendChild(delBtn); tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+    $('#count-orders').textContent = state.orders.length;
+    updateDeleteBtn('orders');
+  }
+
+  /* ---------- PRODUCTION ORDERS ---------- */
+  function renderProduction(){
+    const tbody = $('#table-production tbody');
+    tbody.innerHTML = '';
+    state.production.forEach(row=>{
+      const tr = document.createElement('tr');
+
+      const chk = document.createElement('td'); chk.className='chk-col';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = selected.production.has(row.id);
+      cb.addEventListener('change', ()=>{ cb.checked ? selected.production.add(row.id) : selected.production.delete(row.id); updateDeleteBtn('production'); });
+      chk.appendChild(cb); tr.appendChild(chk);
+
+      const tdDate = document.createElement('td');
+      tdDate.appendChild(editableCell(row.datePurchased, v=>{ row.datePurchased=v; persist('production'); }, 'MM/DD/YYYY'));
+      tr.appendChild(tdDate);
+
+      const tdItem = document.createElement('td');
+      tdItem.appendChild(editableCell(row.itemPurchased, v=>{ row.itemPurchased=v; persist('production'); }, 'e.g. hardware, fabric'));
+      tr.appendChild(tdItem);
+
+      const tdQty = document.createElement('td');
+      tdQty.appendChild(editableCell(row.quantity, v=>{ row.quantity=v; persist('production'); renderSummary(); }, '0'));
+      tr.appendChild(tdQty);
+
+      const tdPrice = document.createElement('td');
+      tdPrice.appendChild(editableCell(row.price!==undefined && row.price!=='' ? String(row.price) : '', v=>{ row.price = v===''? '': (parseFloat(v)||0); persist('production'); renderSummary(); }, '0.00'));
+      tr.appendChild(tdPrice);
+
+      const tdVendor = document.createElement('td');
+      tdVendor.appendChild(editableCell(row.vendor, v=>{ row.vendor=v; persist('production'); }, 'Vendor'));
+      tr.appendChild(tdVendor);
+
+      const tdNotes = document.createElement('td');
+      tdNotes.appendChild(editableCell(row.notes, v=>{ row.notes=v; persist('production'); }, 'Notes'));
+      tr.appendChild(tdNotes);
+
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button'); delBtn.className='row-del'; delBtn.textContent='✕';
+      delBtn.addEventListener('click', ()=>{ state.production = state.production.filter(r=>r.id!==row.id); selected.production.delete(row.id); persist('production'); renderProduction(); renderSummary(); });
+      tdDel.appendChild(delBtn); tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+    $('#count-production').textContent = state.production.length;
+    updateDeleteBtn('production');
+  }
+
+  /* ---------- SUMMARY ---------- */
+  function renderSummary(){
+    const styles = state.inventory.map(inv => ({item:inv.item, colorway:inv.colorway}));
+
+    let totalUnits=0, totalRevenue=0;
+    const byStyle = styles.map(s=>{
+      const matching = state.orders.filter(o => (o.item||'').toLowerCase()===String(s.item).toLowerCase() && (o.colorway||'').toLowerCase()===String(s.colorway).toLowerCase());
+      const units = matching.length;
+      const fulfilled = matching.filter(o=>o.status==='Fulfilled').length;
+      const progress = units - fulfilled;
+      const price = priceLookup(s.item, s.colorway) || 0;
+      const revenue = units * price;
+      totalUnits += units; totalRevenue += revenue;
+      return {...s, units, fulfilled, progress, revenue};
+    });
+
+    let productionSpend = 0;
+    state.production.forEach(p=>{
+      const qty = parseFloat(p.quantity) || 1;
+      const price = parseFloat(p.price) || 0;
+      productionSpend += qty * price;
+    });
+
+    const net = totalRevenue - productionSpend;
+
+    $('#summaryStats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Units Ordered</div><div class="stat-value">${totalUnits}</div></div>
+      <div class="stat-card"><div class="stat-label">Revenue (item price)</div><div class="stat-value">${fmtMoney(totalRevenue)}</div></div>
+      <div class="stat-card"><div class="stat-label">Production Spend</div><div class="stat-value amber">${fmtMoney(productionSpend)}</div></div>
+      <div class="stat-card"><div class="stat-label">Net</div><div class="stat-value ${net>=0?'green':''}">${fmtMoney(net)}</div></div>
+    `;
+
+    const tbody = $('#summaryByStyle');
+    tbody.innerHTML = byStyle.map(s=>`
+      <tr>
+        <td><div class="cell-inner">${dotRowHTML(s.item)}</div></td>
+        <td><div class="cell-inner">${s.colorway}</div></td>
+        <td><div class="cell-inner">${s.units}</div></td>
+        <td><div class="cell-inner"><span class="status-pill status-fulfilled">${s.fulfilled}</span></div></td>
+        <td><div class="cell-inner"><span class="status-pill status-progress">${s.progress}</span></div></td>
+        <td><div class="cell-inner">${fmtMoney(s.revenue)}</div></td>
+      </tr>
+    `).join('') || `<tr><td colspan="6"><div class="empty-state">Add inventory items to see totals here.</div></td></tr>`;
+  }
+
+  function updateDeleteBtn(which){
+    const btn = which==='inventory' ? $('#delInventory') : which==='orders' ? $('#delOrders') : $('#delProduction');
+    btn.classList.toggle('show', selected[which].size > 0);
+  }
+
+  function renderAll(){
+    renderInventory();
+    renderOrders();
+    renderProduction();
+    renderSummary();
+  }
+
+  /* tabs */
+  $$('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      $$('.tab').forEach(t=>t.classList.remove('active'));
+      $$('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      $('#panel-'+tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  /* add row */
+  $$('[data-add]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const which = btn.dataset.add;
+      if(which==='inventory') state.inventory.push({id:uid(), item:'', colorway:'', price:''});
+      if(which==='orders') state.orders.push({id:uid(), customer:'', item:'', colorway:'', shipping:'', dateOrdered:'', address:'', status:'In Progress'});
+      if(which==='production') state.production.push({id:uid(), datePurchased:'', itemPurchased:'', quantity:'', price:'', vendor:'', notes:''});
+      persist(which);
+      if(which==='inventory') renderInventory();
+      if(which==='orders') renderOrders();
+      if(which==='production') renderProduction();
+      renderSummary();
+    });
+  });
+
+  /* bulk delete */
+  $('#delInventory').addEventListener('click', ()=>{
+    state.inventory = state.inventory.filter(r=>!selected.inventory.has(r.id));
+    selected.inventory.clear(); persist('inventory'); renderInventory(); renderOrders(); renderSummary();
+  });
+  $('#delOrders').addEventListener('click', ()=>{
+    state.orders = state.orders.filter(r=>!selected.orders.has(r.id));
+    selected.orders.clear(); persist('orders'); renderOrders(); renderSummary();
+  });
+  $('#delProduction').addEventListener('click', ()=>{
+    state.production = state.production.filter(r=>!selected.production.has(r.id));
+    selected.production.clear(); persist('production'); renderProduction(); renderSummary();
+  });
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
