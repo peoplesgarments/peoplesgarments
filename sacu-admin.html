@@ -248,6 +248,48 @@
 
   .empty-state{ padding:36px 10px; text-align:center; color:var(--text-muted); font-size:13px; }
 
+  /* password gate */
+  .gate{
+    position:fixed; inset:0; background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    z-index:1000;
+  }
+  .gate-box{
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; gap:4px;
+    width:260px;
+  }
+  .gate-mark{ font-size:22px; color:var(--text); margin-bottom:6px; }
+  .gate-title{ font-size:17px; font-weight:700; letter-spacing:-0.01em; color:var(--text); }
+  .gate-sub{ font-size:13px; color:var(--text-muted); margin-bottom:18px; }
+  .gate-input{
+    width:100%;
+    border:1px solid var(--border-strong);
+    border-radius:6px;
+    padding:10px 12px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--text);
+    text-align:center;
+    letter-spacing:0.2em;
+    margin-bottom:10px;
+    outline:none;
+  }
+  .gate-input:focus{ border-color:var(--blue); box-shadow:0 0 0 2px rgba(35,131,226,0.15); }
+  .gate-btn{
+    width:100%;
+    appearance:none; border:none; border-radius:6px;
+    background:var(--text); color:#fff;
+    font-family:inherit; font-size:13.5px; font-weight:600;
+    padding:10px 12px; cursor:pointer;
+  }
+  .gate-btn:hover{ background:#000; }
+  .gate-error{
+    font-size:12px; color:var(--red);
+    margin-top:10px; visibility:hidden;
+  }
+  .gate-error.show{ visibility:visible; }
+
   @media (max-width:720px){
     .wrap{ padding:28px 18px 70px; }
     .summary-grid{ grid-template-columns:repeat(2,1fr); }
@@ -257,7 +299,19 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div id="gate" class="gate">
+  <div class="gate-box">
+    <div class="gate-mark">✦</div>
+    <div class="gate-title">SACU Admin</div>
+    <div class="gate-sub">Enter password to continue</div>
+    <input type="password" id="gatePw" class="gate-input" autocomplete="off" />
+    <button id="gateBtn" class="gate-btn">Enter</button>
+    <div id="gateError" class="gate-error">Incorrect password</div>
+  </div>
+</div>
+
+<div class="wrap" id="mainContent" style="display:none;">
 
   <div class="crumb">
     <span class="mark">✦</span>
@@ -364,8 +418,47 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
+  const GATE_PW = '0824';
+  const GATE_SESSION_KEY = 'sacu_gate_ok';
+
+  function reveal(){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('mainContent').style.display = '';
+  }
+
+  function tryPassword(){
+    const val = document.getElementById('gatePw').value;
+    if(val === GATE_PW){
+      try{ sessionStorage.setItem(GATE_SESSION_KEY, '1'); }catch(e){}
+      reveal();
+      if(window.__sacuStartApp) window.__sacuStartApp();
+    } else {
+      document.getElementById('gateError').classList.add('show');
+      document.getElementById('gatePw').value = '';
+      document.getElementById('gatePw').focus();
+    }
+  }
+
+  document.getElementById('gateBtn').addEventListener('click', tryPassword);
+  document.getElementById('gatePw').addEventListener('keydown', e=>{ if(e.key==='Enter') tryPassword(); });
+
+  let alreadyOk = false;
+  try{ alreadyOk = sessionStorage.getItem(GATE_SESSION_KEY) === '1'; }catch(e){}
+  if(alreadyOk){ reveal(); }
+  else{ document.getElementById('gatePw').focus(); }
+  window.__sacuGateAlreadyOK = alreadyOk;
+})();
+
+(function(){
+  const SUPABASE_URL = 'https://tmojrzfkyxdnhvxsrjdp.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_77y2BrAleX6d-J1z430tSA_b3tg2F8k';
+  let supa = null;
+  try{ supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+  catch(e){ console.error('Supabase init failed, falling back to local storage', e); }
+
   const KEYS = { inventory:'sacu:inventory', orders:'sacu:orders', production:'sacu:production' };
 
   const DEFAULT_INVENTORY = [
@@ -421,10 +514,18 @@
   }
 
   async function safeGet(key){
+    // try Supabase first (syncs across devices)
+    if(supa){
+      try{
+        const { data, error } = await supa.from('sacu_kv').select('value').eq('key', key).maybeSingle();
+        if(!error && data) return data.value;
+        if(!error && !data) return null; // no row yet — not an error
+      }catch(e){ console.error('Supabase read failed, trying local cache', e); }
+    }
+    // fallback: local cache (covers offline / first-load-before-network / no supabase)
     try{
-      const res = await window.storage.get(key, false);
-      if(!res) return null;
-      return JSON.parse(res.value);
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
     }catch(e){ return null; }
   }
 
@@ -432,8 +533,14 @@
     setSaveState(true);
     clearTimeout(saveTimer);
     saveTimer = setTimeout(async ()=>{
-      try{ await window.storage.set(KEYS[which], JSON.stringify(state[which]), false); }
-      catch(e){ console.error('Save failed', e); }
+      const key = KEYS[which];
+      // always write local cache immediately so nothing is lost if network fails
+      try{ localStorage.setItem(key, JSON.stringify(state[which])); }catch(e){}
+      if(supa){
+        try{
+          await supa.from('sacu_kv').upsert({ key, value: state[which], updated_at: new Date().toISOString() });
+        }catch(e){ console.error('Supabase save failed, kept in local cache', e); }
+      }
       setSaveState(false);
     }, 350);
   }
@@ -757,7 +864,8 @@
     selected.production.clear(); persist('production'); renderProduction(); renderSummary();
   });
 
-  loadAll();
+  window.__sacuStartApp = loadAll;
+  if(window.__sacuGateAlreadyOK) loadAll();
 })();
 </script>
 </body>
