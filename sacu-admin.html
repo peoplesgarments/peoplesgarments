@@ -460,7 +460,7 @@
     <div class="section-label">Units sold by style</div>
     <table>
       <thead><tr>
-        <th>Item</th><th>Colorway</th><th>Units Ordered</th><th>Fulfilled</th><th>In Progress</th><th>Revenue</th>
+        <th>Item</th><th>Colorway</th><th>Units Ordered</th><th>Fulfilled</th><th>Ready to Ship</th><th>Need to Make</th><th>Revenue</th>
       </tr></thead>
       <tbody id="summaryByStyle"></tbody>
     </table>
@@ -521,7 +521,8 @@
     {name:'orange', hex:'#E38A3C'},
     {name:'gray',   hex:'#8A8A86'},
   ];
-  const DEFAULT_COLORS = { status:{ 'In Progress':'#E3BE3F', 'Fulfilled':'#3DA35D' }, tags:{} };
+  const STATUS_OPTIONS = ['Need to Make', 'Ready to Ship', 'Fulfilled'];
+  const DEFAULT_COLORS = { status:{ 'Need to Make':'#E3BE3F', 'Ready to Ship':'#3B82F6', 'Fulfilled':'#3DA35D' }, tags:{} };
 
   const DEFAULT_INVENTORY = [
     {item:'Clutch', colorway:'Black', price:65},
@@ -530,13 +531,13 @@
     {item:'Pouch', colorway:'Cream', price:35},
   ];
   const DEFAULT_ORDERS = [
-    {customer:'Penda', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
-    {customer:'Syd', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
-    {customer:'Baiyina', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
-    {customer:'Sumaya', item:'Clutch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
-    {customer:'Fatima', item:'Clutch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
-    {customer:'', item:'Pouch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
-    {customer:'', item:'Pouch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'In Progress'},
+    {customer:'Penda', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
+    {customer:'Syd', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
+    {customer:'Baiyina', item:'Clutch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
+    {customer:'Sumaya', item:'Clutch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
+    {customer:'Fatima', item:'Clutch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
+    {customer:'', item:'Pouch', colorway:'Black', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
+    {customer:'', item:'Pouch', colorway:'Cream', shipping:'', dateOrdered:'', address:'', status:'Need to Make'},
   ];
   const DEFAULT_PRODUCTION = [];
 
@@ -568,6 +569,7 @@
       if(!ord) await persist('orders');
       if(!prod) await persist('production');
       if(!cols) await persist('colors');
+      migrateLegacyStatus();
     }catch(e){
       console.error('Load failed, using defaults', e);
       state.inventory = DEFAULT_INVENTORY.map(r=>({id:uid(),...r}));
@@ -576,6 +578,25 @@
       state.colors = JSON.parse(JSON.stringify(DEFAULT_COLORS));
     }
     renderAll();
+  }
+
+  /* one-time migration: old model was ['In Progress','Fulfilled'], new model is
+     ['Need to Make','Ready to Ship','Fulfilled']. Existing "In Progress" orders become
+     "Need to Make" (nothing's been marked started/finished yet) — any custom color the
+     user already picked for "In Progress" carries over so it doesn't visually reset. */
+  function migrateLegacyStatus(){
+    let changed = false;
+    if(state.colors.status && state.colors.status['In Progress']){
+      if(!state.colors.status['Need to Make']) state.colors.status['Need to Make'] = state.colors.status['In Progress'];
+      delete state.colors.status['In Progress'];
+      changed = true;
+    }
+    let ordersChanged = false;
+    state.orders.forEach(o=>{
+      if(o.status === 'In Progress'){ o.status = 'Need to Make'; ordersChanged = true; }
+    });
+    if(changed) persist('colors');
+    if(ordersChanged) persist('orders');
   }
 
   async function safeGet(key){
@@ -768,7 +789,7 @@
       const sel = document.createElement('select');
       sel.className = 'status-select';
       sel.style.color = statusColorHex(row.status);
-      ['In Progress','Fulfilled'].forEach(opt=>{
+      STATUS_OPTIONS.forEach(opt=>{
         const o = document.createElement('option'); o.value=opt; o.textContent=opt;
         if(row.status===opt) o.selected=true;
         sel.appendChild(o);
@@ -844,11 +865,12 @@
       const matching = state.orders.filter(o => (o.item||'').toLowerCase()===String(s.item).toLowerCase() && (o.colorway||'').toLowerCase()===String(s.colorway).toLowerCase());
       const units = matching.length;
       const fulfilled = matching.filter(o=>o.status==='Fulfilled').length;
-      const progress = units - fulfilled;
+      const readyToShip = matching.filter(o=>o.status==='Ready to Ship').length;
+      const needToMake = matching.filter(o=>o.status==='Need to Make').length;
       const price = priceLookup(s.item, s.colorway) || 0;
       const revenue = units * price;
       totalUnits += units; totalRevenue += revenue;
-      return {...s, units, fulfilled, progress, revenue};
+      return {...s, units, fulfilled, readyToShip, needToMake, revenue};
     });
 
     let productionSpend = 0;
@@ -874,7 +896,8 @@
         <td><div class="cell-inner">${s.colorway}</div></td>
         <td><div class="cell-inner">${s.units}</div></td>
         <td><div class="cell-inner"><span class="status-pill" style="color:${statusColorHex('Fulfilled')}">${s.fulfilled}</span></div></td>
-        <td><div class="cell-inner"><span class="status-pill" style="color:${statusColorHex('In Progress')}">${s.progress}</span></div></td>
+        <td><div class="cell-inner"><span class="status-pill" style="color:${statusColorHex('Ready to Ship')}">${s.readyToShip}</span></div></td>
+        <td><div class="cell-inner"><span class="status-pill" style="color:${statusColorHex('Need to Make')}">${s.needToMake}</span></div></td>
         <td><div class="cell-inner">${fmtMoney(s.revenue)}</div></td>
       </tr>
     `).join('') || `<tr><td colspan="6"><div class="empty-state">Add inventory items to see totals here.</div></td></tr>`;
@@ -903,7 +926,7 @@
     const tagBox = $('#popoverTagColors');
     if(!statusBox || !tagBox) return;
 
-    statusBox.innerHTML = ['In Progress','Fulfilled'].map(status => `
+    statusBox.innerHTML = STATUS_OPTIONS.map(status => `
       <div class="popover-row">
         <span class="popover-label">${status}</span>
         <span class="swatch-picker" data-kind="status" data-key="${status}">${swatchPickerHTML(statusColorHex(status))}</span>
@@ -958,7 +981,7 @@
     btn.addEventListener('click', ()=>{
       const which = btn.dataset.add;
       if(which==='inventory') state.inventory.push({id:uid(), item:'', colorway:'', price:''});
-      if(which==='orders') state.orders.push({id:uid(), customer:'', item:'', colorway:'', shipping:'', dateOrdered:'', address:'', status:'In Progress'});
+      if(which==='orders') state.orders.push({id:uid(), customer:'', item:'', colorway:'', shipping:'', dateOrdered:'', address:'', status:'Need to Make'});
       if(which==='production') state.production.push({id:uid(), datePurchased:'', itemPurchased:'', quantity:'', price:'', vendor:'', notes:''});
       persist(which);
       if(which==='inventory') renderInventory();
