@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/compendium/"><!-- keeps images working at peoplesgarments.com/compendium -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>The Compendium of Guinea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap">
+</head>
+<body>
+<style>
+/* Layout: the archive collage as a desktop. The father's line sits in a window at top left, folders stack beneath it, the probe title sits top right. Everything opens as embossed green windows with white bodies. Single committed look. */
+:root{
+  --green:#3a7a56;      /* window frames, title bars, buttons */
+  --green-lt:#7fe3b4;   /* bevel highlight */
+  --green-dk:#1f4a33;   /* bevel shadow */
+  --yellow:#f3c44e;     /* titles and arrows */
+  --red:#d9473a;        /* close boxes */
+  --paper:#ffffff;
+  --pane:#eceff0;       /* inner viewing panes */
+  --ink:#141418;
+  --soft:#5a5a66;
+  --mark:#fff1c2;
+  --mono:"Space Mono","Courier New",monospace;
+  --label:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:#4b4a6e url("bg.jpg") center/cover no-repeat;color:var(--ink);font:13px/1.5 var(--mono);overflow:hidden}
+.desk{position:fixed;inset:0}
+
+/* probe title, top right */
+.titles{position:absolute;top:24px;right:28px;z-index:1;pointer-events:none;font:700 12px/1.3 var(--mono);text-transform:uppercase;color:#fff;letter-spacing:.06em}
+.titles span{display:block}
+
+/* desktop folders, stacked under the quote window */
+.folders{position:absolute;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:row;gap:18px}
+.dfolder{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:1px dotted transparent;padding:4px;cursor:pointer;width:110px}
+.dfolder svg{width:62px;height:auto;image-rendering:pixelated}
+.dfolder .lab{font:400 13px/1.2 var(--mono);text-transform:uppercase;color:#fff;text-shadow:0 1px 3px rgba(20,20,24,.85),0 0 1px #000}
+.dfolder:hover,.dfolder:focus-visible{border-color:#fff;outline:none;background:rgba(58,122,86,.25)}
+
+/* windows: embossed green frame, white inside */
+.win{position:absolute;z-index:10;width:min(360px,calc(100vw - 24px));display:flex;flex-direction:column;max-height:calc(100% - 24px);background:var(--green);border:3px solid;border-color:var(--green-lt) var(--green-dk) var(--green-dk) var(--green-lt);box-shadow:3px 3px 0 rgba(20,20,24,.35)}
+.bar{display:flex;align-items:center;gap:6px;padding:7px 6px 7px 10px;cursor:grab;touch-action:none;user-select:none;border-bottom:3px solid;border-color:var(--green-lt)}
+.bar:active{cursor:grabbing}
+.bar .t{flex:1;min-width:0;font:700 14px/1 var(--mono);color:var(--yellow);letter-spacing:.12em;text-transform:uppercase;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x{flex:none;width:22px;height:22px;background:var(--red);color:#fff;font:700 13px/1 var(--mono);cursor:pointer;display:grid;place-items:center;padding:0;border:2px solid;border-color:#ffb0a6 #7d1d14 #7d1d14 #ffb0a6}
+.x:active{border-color:#7d1d14 #ffb0a6 #ffb0a6 #7d1d14}
+.body{background:var(--paper);padding:14px 16px;overflow:auto;min-height:0;display:flex;flex-direction:column;gap:12px;border:2px solid;border-color:var(--green-dk) var(--green-lt) var(--green-lt) var(--green-dk);margin:4px}
+.quote{background:var(--pane);font:700 clamp(20px,2.4vw,27px)/1.6 var(--mono);text-transform:uppercase;text-align:justify;text-align-last:justify;letter-spacing:.02em;padding:22px 18px;margin:0}
+.attr{font-size:12px;color:var(--soft);margin:0;text-transform:uppercase;letter-spacing:.06em}
+.nav{display:flex;align-items:center;gap:8px;min-height:20px}
+.back{background:none;border:0;font:700 18px/1 var(--mono);cursor:pointer;padding:0 6px 0 0;color:var(--ink)}
+.crumb{font:400 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+p{margin:0}
+.lead{font-weight:700;font-size:14px;line-height:1.4}
+.note{font-size:11px;color:var(--soft)}
+.step{font:700 11px/1 var(--mono);letter-spacing:.1em;color:var(--green);text-transform:uppercase}
+.btn{align-self:stretch;background:var(--green);color:var(--yellow);font:700 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;cursor:pointer;border:3px solid;border-color:var(--green-lt) var(--green-dk) var(--green-dk) var(--green-lt)}
+.btn:active{border-color:var(--green-dk) var(--green-lt) var(--green-lt) var(--green-dk)}
+.btn:disabled{background:#9db8a9;color:#e8efe9;cursor:not-allowed}
+:focus-visible{outline:2px dotted var(--ink);outline-offset:2px}
+form{display:flex;flex-direction:column;gap:12px}
+label.q{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:13px}
+textarea{font:400 13px/1.5 var(--mono);color:var(--ink);background:var(--paper);padding:6px 8px;width:100%;box-sizing:border-box;border-radius:0;min-height:72px;resize:vertical;border:2px solid;border-color:#8b8a8f #fff #fff #8b8a8f;box-shadow:inset 1px 1px 0 #5c5b60}
+.count{font:400 11px var(--mono);color:var(--soft);align-self:flex-end;font-variant-numeric:tabular-nums}
+.count.ok{color:var(--green);font-weight:700}
+
+/* folder grid inside a window */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 8px;padding:10px 0}
+.mini{display:flex;flex-direction:column;align-items:center;gap:10px;background:none;border:1px dotted transparent;padding:6px 2px;cursor:pointer;font:400 13px/1.2 var(--mono);color:var(--ink);text-align:center;text-transform:uppercase}
+.mini:hover,.mini:focus-visible{border-color:var(--ink);outline:none}
+.mini svg{width:46px;height:auto;image-rendering:pixelated}
+.mini.done span::after{content:" ✓";color:var(--green)}
+
+.img{aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;text-align:center;padding:12px;font-size:12px;color:var(--soft);background:var(--pane)}
+.img img{width:100%;height:100%;object-fit:cover}
+
+/* fragments viewer */
+.viewer{display:flex;flex-direction:column;min-height:0}
+.page{min-height:170px;display:flex;flex-direction:column;gap:8px;background:var(--pane);padding:12px}
+.pager{display:grid;grid-template-columns:1fr 1fr;margin:12px -16px -14px}
+.pager button{background:var(--green);color:var(--yellow);font:700 20px/1 var(--mono);cursor:pointer;padding:8px 0;border:3px solid;border-color:var(--green-lt) var(--green-dk) var(--green-dk) var(--green-lt)}
+.pager button:active{border-color:var(--green-dk) var(--green-lt) var(--green-lt) var(--green-dk)}
+.pager button:disabled{color:#86ad97;cursor:default}
+.pos{font:400 11px/1 var(--mono);color:var(--soft);text-align:center;font-variant-numeric:tabular-nums}
+blockquote{margin:0;font-size:13px;line-height:1.55}
+mark{background:var(--mark);color:inherit;padding:0 2px}
+.src{font-size:11px;color:var(--soft)}
+.anno{border-left:3px solid var(--green);padding:5px 9px;background:#fff;font-style:italic;font-size:12px}
+.loop{white-space:pre-wrap}
+.done-msg{font:700 11px/1.5 var(--mono);color:var(--green);text-transform:uppercase;letter-spacing:.06em}
+.resp{display:flex;flex-direction:column;gap:3px;font-size:12px;border-top:3px solid var(--green);padding-top:8px}
+.resp b{font:700 10px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--green);margin-top:5px}
+
+/* image files inside a garment folder */
+.files{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 14px;padding:6px 0}
+@media (max-width:620px){.files{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.file{display:flex;flex-direction:column;gap:6px;background:none;border:1px dotted transparent;padding:4px;cursor:pointer;font:400 11px/1.3 var(--mono);color:var(--ink);text-align:left}
+.file:hover,.file:focus-visible{border-color:var(--ink);outline:none}
+.file img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--pane);filter:grayscale(1)}
+.file.seen span::after{content:" ✓";color:var(--green);font-weight:700}
+[data-stage]{display:flex;flex-direction:column;gap:12px}
+.rows{display:flex;flex-direction:column;gap:14px}
+.row{display:grid;grid-template-columns:132px minmax(0,1fr);gap:14px;align-items:start;padding-bottom:14px;border-bottom:1px dotted #c9ccd0}
+.row:last-child{border-bottom:0;padding-bottom:0}
+.rowcap{display:flex;flex-direction:column;gap:4px}
+@media (max-width:620px){.row{grid-template-columns:96px minmax(0,1fr)}}
+.progress{font:400 11px/1.4 var(--mono);color:var(--soft);font-variant-numeric:tabular-nums}
+.photo{display:block;width:100%;height:auto;background:var(--pane)}
+.cap{font-size:12px;line-height:1.55;color:var(--ink)}
+.fig{margin:0;display:flex;flex-direction:column;gap:8px}
+.fig figcaption{display:flex;flex-direction:column;gap:4px}
+.split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+.desc{display:flex;flex-direction:column;gap:10px;font-size:12px;line-height:1.6}
+.hl{display:flex;flex-direction:column;gap:8px}
+.hl img{display:block;width:100%;height:auto;border:1px solid #c9ccd0}
+.pg{background:var(--pane);display:grid;place-items:center;padding:8px}
+.pg img{display:block;max-width:100%;max-height:min(62vh,640px);width:auto;height:auto;box-shadow:0 1px 4px rgba(20,20,24,.25)}
+@media (max-width:620px){.split{grid-template-columns:1fr}}
+
+@media (max-width:620px){
+  .win{left:12px!important;width:calc(100vw - 24px)!important}
+  .titles{font-size:14px;top:auto;bottom:16px}
+  .folders{flex-direction:row;top:auto!important;bottom:70px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .win{animation:pop .14s steps(3) both}
+  @keyframes pop{from{transform:scale(.92);opacity:.3}to{transform:none;opacity:1}}
+}
+</style>
+
+<div class="desk" id="desk"><header class="titles"><span>The Compendium Probe</span><span>of Guinea</span></header><nav class="folders" id="center" aria-label="Folders"></nav></div>
+
+<template id="bigFolder"><svg viewBox="0 0 24 20" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="2" width="8" height="2" fill="#6b6b2a"/><rect x="3" y="3" width="6" height="2" fill="#e8d36a"/><rect x="2" y="4" width="19" height="14" fill="#6b6b2a"/><rect x="3" y="5" width="17" height="12" fill="#e8d36a"/><rect x="7" y="1" width="10" height="11" fill="#fff"/><rect x="7" y="1" width="10" height="1" fill="#8b8a8f"/><rect x="16" y="1" width="1" height="11" fill="#8b8a8f"/><rect x="9" y="4" width="6" height="1" fill="#2a3bd6"/><rect x="9" y="6" width="5" height="1" fill="#2a3bd6"/><rect x="10" y="3" width="2" height="1" fill="#2a3bd6"/><rect x="1" y="9" width="20" height="10" fill="#6b6b2a"/><rect x="2" y="10" width="18" height="8" fill="#f1e58c"/><rect x="2" y="10" width="18" height="1" fill="#fff6c2"/><rect x="3" y="12" width="2" height="1" fill="#e8d36a"/><rect x="7" y="14" width="2" height="1" fill="#e8d36a"/><rect x="13" y="12" width="2" height="1" fill="#e8d36a"/><rect x="2" y="19" width="20" height="1" fill="#141418"/><rect x="21" y="10" width="1" height="9" fill="#141418"/></svg></template>
+<template id="miniFolder"><svg viewBox="0 0 24 20" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="2" width="8" height="2" fill="#6b6b2a"/><rect x="3" y="3" width="6" height="2" fill="#e8d36a"/><rect x="2" y="4" width="19" height="14" fill="#6b6b2a"/><rect x="3" y="5" width="17" height="12" fill="#e8d36a"/><rect x="7" y="1" width="10" height="11" fill="#fff"/><rect x="7" y="1" width="10" height="1" fill="#8b8a8f"/><rect x="16" y="1" width="1" height="11" fill="#8b8a8f"/><rect x="9" y="4" width="6" height="1" fill="#2a3bd6"/><rect x="9" y="6" width="5" height="1" fill="#2a3bd6"/><rect x="10" y="3" width="2" height="1" fill="#2a3bd6"/><rect x="1" y="9" width="20" height="10" fill="#6b6b2a"/><rect x="2" y="10" width="18" height="8" fill="#f1e58c"/><rect x="2" y="10" width="18" height="1" fill="#fff6c2"/><rect x="3" y="12" width="2" height="1" fill="#e8d36a"/><rect x="7" y="14" width="2" height="1" fill="#e8d36a"/><rect x="13" y="12" width="2" height="1" fill="#e8d36a"/><rect x="2" y="19" width="20" height="1" fill="#141418"/><rect x="21" y="10" width="1" height="9" fill="#141418"/></svg></template>
+
+<script>
+(function(){
+"use strict";
+const desk=document.getElementById("desk"), center=document.getElementById("center");
+let z=20,cascade=0,db=null,uid=null,isOwner=false;
+const MIN_WORDS=0; /* no word minimum: people type freely */
+const record={folders:{}};
+
+/* ===================== CONTENT ===================== */
+const GARMENTS=[
+ {id:"white",name:"The color white",image:"white/1-toure.jpg",imageNote:"Sékou Touré dressed in white",
+  before:["Insert question here"], /* placeholder until the questions are decided */
+  after:["Insert question here","Insert question here"],
+  /* images 1-3 are open from the start; Allons Jouer (later:true) appears only after the first answer */
+  photos:[
+   {id:"toure",file:"1. Toure.jpg",src:"white/1-toure.jpg",alt:"Sékou Touré in a white suit and white hat, hand raised to his face",width:420,
+    cap:`Ahmed Sékou Touré (1922–1984), Guinea's first president. He led the independence movement that freed Guinea from French colonial rule in 1958 and governed until his death in 1984. Almost every government-issued image of him shows his signature white suit and hat.`},
+   {id:"suit",file:"2. Black/white suit.jpg",src:"white/2-black-white-suit.jpg",alt:"A Guinean man in a dark European-style suit and hat walking across a tiled terrace",width:440,
+    cap:`Photo taken in Conakry, photographer unknown: 'the man has turned his back on African civilization, and exemplifies the main ills of Western influence on Guinea and on Africa' — about his attire specifically.`,
+    capSrc:`Published with Guinea's National Cultural Festival. Epifano, Figure 5.`},
+   {id:"toure01",file:"3. Toure01.jpg",src:"white/3-toure01.jpg",alt:"Sékou Touré in flowing white robes and hat, waving a white handkerchief on an airport tarmac",width:440,
+    cap:`Sékou Touré, again in white. Among his many titles were Le Responsable Suprême de la Révolution [The Supreme Leader of the Revolution] and Silly, Susu for "elephant." He imagined postcolonial Guinea as heir to Samory Touré's Wassoulou Empire, and his image became the essence of Guinean identity: he "stood in for the Guinean people and nation."`,
+    capSrc:`Epifano, "The Image of Sékou Touré."`},
+   {id:"allons",later:true,file:"4. Allons Jouer.jpg",src:"white/4-allons-jouer.jpg",alt:"Allons Jouer print: faded photographs of boys layered with my father's written memory",width:720,
+    desc:`<p class="step">Allons Jouer</p><p><i>Allons Jouer</i>, or <i>Let's Play!</i> in French, is a re-imaginative print design that's meant to expose memory through text and image. The memory recounts my dad's experiences playing soccer as a young boy with his three older brothers and friends where they "used to play barefoot on unpaved roads, our soccer equipments were: for the ball we used to use old socks, we stock old clothes inside until it becomes soft enough".</p><p>Alongside his memories, he also recounts the color white that painted the fields, the trees, and so forth under Touré's regime. Although Touré relied on image and propaganda to reimagine the landscape and wellbeing of Guinea, the actual experience of living in Guinea brings forth questions of how the youth grew up and continued to play within a fragmented reality, piecing together play from whatever was left behind: old socks, old clothes, tree sap.</p>`},
+  ],
+  know:{
+   desc:`<p>Under Sékou Touré, white became a sign. Almost every government-issued image showed him in his white suit and hat, and Guineans, from students to party officials to generals, were encouraged to dress the same way. Women wore copious amounts of white, often printed with his face.</p><p>Epifano compares this to <mark>"un glissement sémantique" [a semantic shift]</mark>: clothing became an ideological tool. It traveled through space and reminded Guineans of proper cultural practice, and of the consequences of performing culture improperly. White read as loyalty to the nation. The European suit and hat in image 2 was published as its opposite: the caption said the man had turned his back on African civilization.</p>`,
+   source:`Angie Epifano, "The Image of Sékou Touré: Art and the Making of Postcolonial Guinea," in <i>Fictions of African Dictatorship</i>, ed. Charlotte Baker and Hannah Grayson, pp. 26–29.`,
+   highlights:[{src:"white/highlight-1.jpg",alt:"Highlighted passage from Epifano, page 26: clothing was heavily policed"},{src:"white/highlight-2.jpg",alt:"Highlighted passage: clothing had the ability to travel through space"}],
+   article:{title:"The Image of Sékou Touré · pp. 26–29",pages:[["white/epifano-16.jpg","p. 26"],["white/epifano-17.jpg","p. 27"],["white/epifano-18.jpg","p. 28"],["white/epifano-19.jpg","p. 29"]]},
+   extra:{title:"About the color white",pages:[["white/about-1.jpg","1 / 3"],["white/about-2.jpg","2 / 3"],["white/about-3.jpg","3 / 3"]]},
+  },
+  snippets:[
+   {title:"A semantic shift",html:`<blockquote>"In Guinea, Touré used clothing as an ideological tool comparable to 'un glissement sémantique' [a semantic shift]… Clothing had the ability to travel through space and remind Guineans not only of proper cultural practices, but also of the <mark>consequences of improperly performing culture</mark>."</blockquote><p class="src">Epifano, 26</p>`},
+   {title:"Stood in for the nation",html:`<blockquote>"a <mark>metonymic relationship</mark> in which Touré stood in for the Guinean people and nation"</blockquote><p class="src">Epifano</p><p class="anno">People dressed like him and carried his image of Guinea on their own bodies.</p>`},
+   {title:"The black suit and tie",html:`<p>The black suit and tie was regarded as one of the <mark>main ills of Western influence</mark> on Guinea and on Africa.</p><p class="src">Epifano, 14</p><p class="anno">Yet his plain white still echoes the formality of the European suit he rejected.</p>`},
+   {title:"Invisible",html:`<p>Touré claimed to remain an <mark>"invisible"</mark> point of reference, yet his image touched every part of the nation.</p><p class="src">Epifano, 23</p>`},
+   {title:"My father: lacho",html:`<p class="loop">To mark the field limits, we used to use a white paint powder we used to call it "Lacho". This type of paint used to be used by the Sekou Touré authoritarian regime for his propaganda to paint everything in white to make the city to look beautiful. All the trees were half painted in white, so on. <mark>White color was his logo for everything.</mark></p><p class="src">My father, written for me</p>`},
+  ]},
+ {id:"headwrap",name:"Headwraps in Guinea",image:"",imageNote:"Image: a woman in a wrapped headwrap",
+  before:["What catches your eye about the headwrap?","What do you think it tells you about the woman wearing it?"],
+  after:["What did you miss the first time you looked?","Is there something you or your family wear that says more than it seems to?"],
+  snippets:[
+   {title:"Three names",html:`<p><mark>Jala</mark> for the Maninka, <mark>tikawol</mark> for the Fula, <mark>khunkury</mark> for the Susu.</p><p class="src">My mother, on the phone</p>`},
+   {title:"The sound of it",html:`<p>The stiff, slightly glossy wax fabric. I can hear it as my mother stands in front of the mirror, the final matching touch to her bazin.</p>`},
+   {title:"A universe of status",html:`<p>There is an entire universe behind how a woman wraps her head. It signals <mark>status</mark> through the choice of colors, the layers wrapped, and how large or small it appears around her head.</p><p class="anno">I expected her to call it an accessory. She described an identity.</p>`},
+   {title:"Marital status",html:`<p>The headwrap is a key signifier of a Guinean woman's identity, revealing her <mark>marital status</mark>.</p><p class="src">My mother</p>`},
+   {title:"A full woman",html:`<p>In my mother's words, the headwrap separates <mark>"a full woman"</mark> from one who is part of society but not yet visible.</p>`},
+  ]},
+ {id:"indigo",name:"Leppi [indigo]",image:"",imageNote:"Image: indigo cloth from the Fouta Djallon",
+  before:["What draws you to this cloth?","What do you think the patterns might mean?"],
+  after:["Knowing what this cloth carries, what does the blue hold for you now?","Why do you think a tradition like this stops being passed down?"],
+  snippets:[
+   {title:"Motifs as a record",html:`<p>Motifs were representative of the time they were made in. The cloth records each era: <mark>colonialism, independence, Touré, Conté</mark>, and later counterfeits.</p><p class="src">Ringuedé, Fouta-Djallon wrappers (pull a quote here)</p>`},
+   {title:"Why it faded",html:`<p>A long-standing tradition carried through the color blue, <mark>economically destabilized</mark> and stabilized again across history, and not well preserved now.</p><p class="anno">Add your annotation here.</p>`},
+   {title:"[Add fragment]",html:`<p>Pulled quote and annotation to come.</p>`},
+  ]},
+];
+const ABOUT=`<p class="lead">How do people engage with a fragmented history when it is handed to them through something beautiful?</p>
+<p>This is a cultural probe for my design research, a simple test. Inside <b>Semiotics</b> are three garments from Guinea's history. Look at each one, tell me what you notice, then open the fragments behind it and look again.</p>
+<p>What draws your eye, how long you stay, and what you leave curious about are all part of what I'm learning.</p>
+<p class="lead">Click the Semiotics folder to get started.</p>
+<p class="note">Mariama Lulah Balde · MFA Communication Design, Pratt Institute</p>`;
+const OPENING=["Your name"];
+const CLOSING=["How did it feel to look at a garment slowly, and then learn what was behind it?","This history was handed to you in fragments, through something beautiful. What drew your eye, what did you stay with, and what are you leaving curious about?"];
+
+/* ===================== WINDOWS ===================== */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function openWin(key,title,html,o={}){
+  const ex=desk.querySelector(`.win[data-key="${key}"]`);if(ex){front(ex);return ex}
+  const w=document.createElement("section");w.className="win";w.dataset.key=key;w.setAttribute("aria-label",title||"Window");
+  if(o.width)w.style.width=`min(${o.width}px,calc(100vw - 24px))`;
+  w.innerHTML=`<div class="bar"><span class="t">${esc(title||"")}</span><button class="x" type="button" aria-label="Close">✕</button></div><div class="body">${html}</div>`;
+  desk.appendChild(w);
+  const W=desk.clientWidth,H=desk.clientHeight;let x,y;
+  if(o.x!=null){x=o.x;y=o.y}else{cascade=(cascade+1)%7;x=W*0.22+cascade*30+Math.random()*50;y=40+cascade*28+Math.random()*30}
+  w.style.left=Math.max(12,Math.min(x,W-w.offsetWidth-12))+"px";w.style.top=Math.max(12,Math.min(y,H-w.offsetHeight-12))+"px";
+  front(w);drag(w);
+  w.querySelector(".x").addEventListener("click",()=>{w.remove();o.onClose&&o.onClose()});
+  w.addEventListener("pointerdown",()=>front(w));
+  return w;
+}
+function front(w){w.style.zIndex=++z}
+function drag(w){const bar=w.querySelector(".bar");let sx,sy,ox,oy,pid=null;
+  bar.addEventListener("pointerdown",e=>{if(e.target.closest(".x"))return;pid=e.pointerId;bar.setPointerCapture(pid);sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop});
+  bar.addEventListener("pointermove",e=>{if(e.pointerId!==pid)return;w.style.left=Math.min(Math.max(-w.offsetWidth+80,ox+e.clientX-sx),desk.clientWidth-80)+"px";w.style.top=Math.min(Math.max(0,oy+e.clientY-sy),desk.clientHeight-36)+"px"});
+  const end=e=>{if(e.pointerId===pid)pid=null};bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end)}
+
+/* ===================== QUESTIONS ===================== */
+function words(t){return (t.trim().match(/\S+/g)||[]).length}
+function questionForm(qs,prefix,minWords,submitLabel){
+  return `<form>${qs.map((q,i)=>`<label class="q" for="${prefix}${i}">${esc(q)}<textarea id="${prefix}${i}" name="a${i}"></textarea>${minWords?`<span class="count" data-count>0 / ${minWords} words</span>`:""}</label>`).join("")}<button class="btn" type="submit"${minWords?" disabled":""}>${esc(submitLabel)}</button></form>`;
+}
+function wireForm(form,qs,minWords,onDone){
+  const tas=[...form.querySelectorAll("textarea")],btn=form.querySelector("button[type=submit]");
+  const check=()=>{let ok=true;tas.forEach(t=>{const n=words(t.value),c=t.parentElement.querySelector("[data-count]");if(c){c.textContent=`${n} / ${minWords} words`;c.classList.toggle("ok",n>=minWords)}if(minWords&&n<minWords)ok=false});btn.disabled=!ok};
+  tas.forEach(t=>t.addEventListener("input",check));
+  form.addEventListener("submit",e=>{e.preventDefault();if(btn.disabled)return;const out={};qs.forEach((q,i)=>out[q in out?`${q} (${i+1})`:q]=tas[i].value.trim());onDone(out)});
+}
+
+/* ===================== SEMIOTICS FOLDER ===================== */
+function openSemiotics(){
+  const mini=document.getElementById("miniFolder").innerHTML;
+  const W=desk.clientWidth;
+  const w=openWin("semiotics","Semiotics",`<div class="nav"><span class="crumb">Political fashioning vs. self-fashioning in Guinea</span></div><div class="grid">${GARMENTS.map(g=>`<button class="mini${done(g.id)?" done":""}" type="button" data-g="${g.id}">${mini}<span>${esc(g.name)}</span></button>`).join("")}</div>`,{width:340,x:W/2-170,y:70});
+  w.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click",()=>openGarment(GARMENTS.find(g=>g.id===b.dataset.g))));
+  track("semiotics");
+}
+function done(id){const r=record.folders[id];return !!(r&&r.after)}
+function refreshSemiotics(){const w=desk.querySelector('.win[data-key="semiotics"]');if(!w)return;GARMENTS.forEach(g=>{const b=w.querySelector(`[data-g="${g.id}"]`);if(b)b.classList.toggle("done",done(g.id))})}
+
+/* ===================== GARMENT FLOW ===================== */
+function openGarment(g){
+  const r=record.folders[g.id]=record.folders[g.id]||{opens:0,snippetsOpened:[]};
+  r.opens++;r.lastOpenedAt=new Date().toISOString();save();
+  const img=g.image?`<div class="img"><img src="${esc(g.image)}" alt="${esc(g.imageNote)}"></div>`:`<div class="img">${esc(g.imageNote)}</div>`;
+  const sw=desk.querySelector('.win[data-key="semiotics"]');
+  const w=openWin("g-"+g.id,g.name,`<div class="nav"><button class="back" type="button" data-back aria-label="Back to Semiotics">←</button><span class="crumb">Semiotics / ${esc(g.name)}</span></div>${img}<div data-stage></div>`,{width:g.photos?460:360,x:sw?sw.offsetLeft+40:undefined,y:sw?sw.offsetTop+50:undefined});
+  w.querySelector("[data-back]").addEventListener("click",()=>{w.remove();openSemiotics()});
+  const stage=w.querySelector("[data-stage]");
+  if(g.photos){photoFlow(g,r,w,stage);return}
+  if(r.after){stage.innerHTML=`<p class="done-msg">You've answered this one. Thank you.</p><button class="btn" type="button" data-frag>Open the fragments again</button>`;stage.querySelector("[data-frag]").addEventListener("click",()=>openViewer(g,r,w));return}
+  if(r.before){afterStage();return}
+  stage.innerHTML=`<p class="step">Look first</p>`+questionForm(g.before,"b-"+g.id+"-",MIN_WORDS,"Know more about this garment");
+  wireForm(stage.querySelector("form"),g.before,MIN_WORDS,ans=>{r.before=ans;r.beforeAt=new Date().toISOString();save();afterStage();openViewer(g,r,w)});
+  function afterStage(){
+    stage.innerHTML=`<p class="step">Read the fragments, then look again</p><button class="btn" type="button" data-frag>Open the fragments</button>`+questionForm(g.after,"a-"+g.id+"-",0,"Send");
+    stage.querySelector("[data-frag]").addEventListener("click",()=>openViewer(g,r,w));
+    wireForm(stage.querySelector("form"),g.after,0,ans=>{r.after=ans;r.afterAt=new Date().toISOString();save();
+      stage.innerHTML=`<p class="done-msg">Thank you. Go back to Semiotics and open another garment.</p>`;refreshSemiotics();maybeClose()});
+  }
+}
+/* Folders with image files (The color white):
+   look first -> open every image -> "Know more about these images" unlocks -> look again */
+function photoFlow(g,r,w,stage){
+  /* Order on every visit: images 1-3 (file names only; captions appear when an image is opened)
+     -> the pre-probe question -> "Know more about these images" reveals the sources,
+     the article and Allons Jouer -> only then the look-again questions. */
+  r.photosOpened=r.photosOpened||[];
+  const media=w.querySelector(".img");if(media)media.remove();
+  const first=g.photos.filter(p=>!p.later); /* Allons Jouer lives only in "Know more" */
+  let revealed=false;
+  stage.innerHTML=`<p class="step">Images in this folder</p><div class="files" data-files></div><div data-before></div><div data-after></div>`;
+  const filesBox=stage.querySelector("[data-files]"),beforeBox=stage.querySelector("[data-before]"),afterBox=stage.querySelector("[data-after]");
+  filesBox.innerHTML=first.map(p=>`<button class="file${r.photosOpened.includes(p.id)?" seen":""}" type="button" data-photo="${p.id}"><img src="${esc(p.src)}" alt="" loading="lazy"><span>${esc(p.file)}</span></button>`).join("");
+  filesBox.querySelectorAll("[data-photo]").forEach(b=>b.addEventListener("click",()=>openPhoto(g.photos.find(p=>p.id===b.dataset.photo),b)));
+  renderBefore();place();
+  function place(){const H=desk.clientHeight,W=desk.clientWidth;w.style.top=Math.max(12,Math.min(w.offsetTop,H-w.offsetHeight-12))+"px";w.style.left=Math.max(12,Math.min(w.offsetLeft,W-w.offsetWidth-12))+"px"}
+  function renderBefore(){
+    beforeBox.innerHTML=`<p class="step">Look first</p>`+questionForm(g.before,"b-"+g.id+"-",0,"Know more about these images");
+    const form=beforeBox.querySelector("form"),tas=[...form.querySelectorAll("textarea")],btn=form.querySelector("button[type=submit]");
+    if(r.before)g.before.forEach((q,i)=>{if(tas[i])tas[i].value=r.before[q]||""});
+    const check=()=>{btn.disabled=!tas.some(t=>t.value.trim())};
+    wireForm(form,g.before,0,ans=>{r.before=ans;r.beforeAt=new Date().toISOString();r.knowOpened=true;r.knowAt=r.beforeAt;save();
+      openKnow(g,w);if(!revealed){revealed=true;renderAfter()}});
+    form.addEventListener("input",check);check();
+  }
+  function renderAfter(){
+    afterBox.innerHTML=`<button class="btn" type="button" data-again>Look again</button>`;
+    afterBox.querySelector("[data-again]").addEventListener("click",openAgain);
+    openAgain();
+  }
+  /* the look-again questions open as their own popup, on top of the sources, so nothing hides them */
+  function openAgain(){
+    const W=desk.clientWidth,H=desk.clientHeight;
+    const aw=openWin("again-"+g.id,"Look again",questionForm(g.after,"a-"+g.id+"-",0,"Send"),{width:420,x:(W-420)/2,y:H});
+    front(aw);
+    const form=aw.querySelector("form");if(!form)return;
+    wireForm(form,g.after,0,ans=>{r.after=ans;r.afterAt=new Date().toISOString();save();
+      aw.querySelector(".body").innerHTML=`<p class="done-msg">Thank you. Go back to Semiotics and open another folder.</p>`;refreshSemiotics();maybeClose()});
+  }
+  function openPhoto(p,btn){
+    const img=`<img class="photo" src="${esc(p.src)}" alt="${esc(p.alt)}">`;
+    const cap=p.cap?`<p class="cap">${esc(p.cap)}</p>${p.capSrc?`<p class="src">${esc(p.capSrc)}</p>`:""}`:"";
+    openWin("p-"+g.id+"-"+p.id,p.file,`<figure class="fig">${img}<figcaption>${cap}</figcaption></figure>`,{width:p.width,x:w.offsetLeft+w.offsetWidth+14+Math.random()*30,y:30+Math.random()*60});
+    if(!r.photosOpened.includes(p.id)){r.photosOpened.push(p.id);save()}
+    btn.classList.add("seen");
+  }
+}
+function openKnow(g,gw){
+  const k=g.know,W=desk.clientWidth,wide=W>=1240; /* wide screens: sources, article and Allons Jouer side by side */
+  const kw=openWin("know-"+g.id,"Know more about these images",`<div class="desc">${k.desc}</div><p class="src"><b>Direct source:</b> ${k.source}</p><p class="step">Highlighted in the article</p><div class="hl">${k.highlights.map(h=>`<img src="${esc(h.src)}" alt="${esc(h.alt)}">`).join("")}</div><button class="btn" type="button" data-art>Read the article, pp. 26–29</button>${(g.photos||[]).some(p=>p.later)?`<p class="step">My father's memory</p><button class="btn" type="button" data-allons>Allons Jouer</button>`:""}<p class="step">Additional source</p><button class="btn" type="button" data-extra>About the color white</button>`,{width:wide?380:420,x:wide?12:Math.max(12,W/2-440),y:24});
+  const pages=(key,p)=>openPages(key,p.title,p.pages,kw.offsetLeft+kw.offsetWidth+12,24,wide?Math.min(440,W-kw.offsetWidth-480):480);
+  kw.querySelector("[data-art]").addEventListener("click",()=>{pages("art-"+g.id,k.article);track(g.id+":article")});
+  kw.querySelector("[data-extra]").addEventListener("click",()=>{pages("extra-"+g.id,k.extra);track(g.id+":about-white")});
+  const allonsBtn=kw.querySelector("[data-allons]");
+  const aw=pages("art-"+g.id,k.article);track(g.id+":article");
+  /* Allons Jouer and its description pop out alongside the articles */
+  const lp=(g.photos||[]).find(p=>p.later&&p.desc);
+  if(lp){
+    const lw=wide?Math.max(320,W-aw.offsetLeft-aw.offsetWidth-24):Math.min(440,W-24);
+    const lwin=openWin("p-"+g.id+"-"+lp.id,lp.file,`<figure class="fig"><img class="photo" src="${esc(lp.src)}" alt="${esc(lp.alt)}"><figcaption class="desc">${lp.desc}</figcaption></figure>`,{width:lw,x:wide?aw.offsetLeft+aw.offsetWidth+12:W-lw-12,y:wide?24:80});
+    const r=record.folders[g.id];if(r){r.photosOpened=r.photosOpened||[];if(!r.photosOpened.includes(lp.id)){r.photosOpened.push(lp.id);save()}}
+    gw.querySelectorAll(`[data-photo="${lp.id}"]`).forEach(b=>b.classList.add("seen"));
+    if(!wide)front(lwin);
+    if(allonsBtn)allonsBtn.addEventListener("click",()=>{const ex=desk.querySelector(`.win[data-key="p-${g.id}-${lp.id}"]`);if(ex){front(ex);return}openKnowAllons()});
+    function openKnowAllons(){openWin("p-"+g.id+"-"+lp.id,lp.file,`<figure class="fig"><img class="photo" src="${esc(lp.src)}" alt="${esc(lp.alt)}"><figcaption class="desc">${lp.desc}</figcaption></figure>`,{width:Math.min(440,W-24),x:W-Math.min(440,W-24)-12,y:60})}
+  }
+}
+/* a page-by-page viewer for PDF pages */
+function openPages(key,title,pages,x,y,width){
+  let i=0;
+  const w=openWin(key,title,`<div class="viewer"><div class="pg" data-page></div><span class="pos" data-pos></span><div class="pager"><button type="button" data-prev aria-label="Previous page">&lt;</button><button type="button" data-next aria-label="Next page">&gt;</button></div></div>`,{width:width||480,x,y});
+  const pg=w.querySelector("[data-page]"),pos=w.querySelector("[data-pos]"),prev=w.querySelector("[data-prev]"),next=w.querySelector("[data-next]");
+  function show(){pg.innerHTML=`<img src="${esc(pages[i][0])}" alt="${esc(title+", "+pages[i][1])}">`;pos.textContent=pages[i][1];prev.disabled=i===0;next.disabled=i===pages.length-1}
+  prev.addEventListener("click",()=>{if(i>0){i--;show()}});next.addEventListener("click",()=>{if(i<pages.length-1){i++;show()}});
+  show();return w;
+}
+/* one window that pages through the fragments, like a file viewer */
+function openViewer(g,r,gw){
+  let i=0;
+  const x=gw?gw.offsetLeft+gw.offsetWidth+12:undefined,y=gw?gw.offsetTop+24:undefined;
+  const w=openWin("v-"+g.id,g.name+": fragments",`<div class="viewer"><div class="page" data-page></div><span class="pos" data-pos></span><div class="pager"><button type="button" data-prev aria-label="Previous fragment">&lt;</button><button type="button" data-next aria-label="Next fragment">&gt;</button></div></div>`,{width:330,x,y});
+  const page=w.querySelector("[data-page]"),pos=w.querySelector("[data-pos]"),prev=w.querySelector("[data-prev]"),next=w.querySelector("[data-next]");
+  function show(){const s=g.snippets[i];page.innerHTML=`<p class="step">${esc(s.title)}</p>${s.html}`;pos.textContent=`${i+1} / ${g.snippets.length}`;prev.disabled=i===0;next.disabled=i===g.snippets.length-1;
+    if(!r.snippetsOpened.includes(s.title)){r.snippetsOpened.push(s.title);save()}}
+  prev.addEventListener("click",()=>{if(i>0){i--;show()}});next.addEventListener("click",()=>{if(i<g.snippets.length-1){i++;show()}});
+  show();
+}
+
+/* ===================== OPENING / CLOSING ===================== */
+function openOpening(){
+  if(record.opening)return;
+  const W=desk.clientWidth;
+  const w=openWin("opening","Hello",`<p class="step">Before you begin</p>`+questionForm(OPENING,"o-",0,"Submit")+`<p class="note">Your answers go to me as part of a design research probe.</p>`,{width:330,x:Math.min(386,W-342),y:30});
+  wireForm(w.querySelector("form"),OPENING,0,ans=>{record.opening=ans;record.startedAt=new Date().toISOString();save();
+    w.querySelector(".body").innerHTML=`<p class="done-msg">Thank you. Open the About folder.</p>`;setTimeout(()=>{w.remove();placeFolders()},1800)});
+}
+function maybeClose(){
+  if(record.closing||!GARMENTS.every(g=>done(g.id)))return;
+  const W=desk.clientWidth;
+  const w=openWin("closing","Last questions",questionForm(CLOSING,"c-",0,"Submit"),{width:360,x:W/2-180,y:60});
+  wireForm(w.querySelector("form"),CLOSING,0,async ans=>{record.closing=ans;record.closedAt=new Date().toISOString();const ok=await save();
+    w.querySelector(".body").innerHTML=`<p class="lead">Merci.</p><p>${ok?"Your answers were sent.":"Thank you for taking part."}</p>`});
+}
+
+/* ===================== RESPONSES (owner only) ===================== */
+async function openResponses(){
+  const w=openWin("responses","Responses","<p>Loading…</p>",{width:460});const body=w.querySelector(".body");
+  if(!db){body.innerHTML="<p>Responses aren't available in this view.</p>";return}
+  try{
+    const snap=await db.collection("responses").get();
+    const rows=snap.docs.map(d=>d.data()).sort((a,b)=>String(b.startedAt||"").localeCompare(String(a.startedAt||"")));
+    if(!rows.length){body.innerHTML="<p>No responses yet.</p>";return}
+    body.innerHTML=`<p>${rows.length} ${rows.length===1?"person":"people"}.</p>`+rows.map(r=>{
+      const qa=o=>Object.entries(o||{}).map(([q,a])=>`<b>${esc(q)}</b><span>${esc(a||"–")}</span>`).join("");
+      const gs=GARMENTS.map(g=>{const f=(r.folders||{})[g.id];if(!f)return `<b>${esc(g.name)}</b><span>Not opened</span>`;
+        const mins=f.beforeAt&&f.afterAt?Math.max(1,Math.round((new Date(f.afterAt)-new Date(f.beforeAt))/60000))+" min with the fragments":"";
+        if(g.photos)return `<b>${esc(g.name)} · before</b>${qa(f.before)}<b>${esc(g.name)} · images opened</b><span>${esc((f.photosOpened||[]).map(id=>(g.photos.find(p=>p.id===id)||{}).file||id).join(", ")||"none")}${f.knowOpened?" · opened Know more":""}</span><b>${esc(g.name)} · after</b>${qa(f.after)}`;
+        return `<b>${esc(g.name)} · before</b>${qa(f.before)}<b>${esc(g.name)} · fragments read</b><span>${esc((f.snippetsOpened||[]).join(", ")||"none")}${mins?" · "+mins:""}</span><b>${esc(g.name)} · after</b>${qa(f.after)}`}).join("");
+      return `<div class="resp">${qa(r.opening)}${gs}${r.closing?qa(r.closing):""}</div>`}).join("");
+  }catch(e){body.innerHTML="<p>Responses couldn't load. Try again in a moment.</p>"}
+}
+
+/* ===================== STORAGE ===================== */
+let chain=Promise.resolve();
+function track(k){record.seen=record.seen||[];if(!record.seen.includes(k)){record.seen.push(k);save()}}
+function save(){const data=JSON.parse(JSON.stringify(record));chain=chain.then(async()=>{
+  if(!db||!uid)return false;try{await db.doc("responses/"+uid).set(data);return true}catch(e){return false}});return chain}
+
+/* ===================== DESKTOP ===================== */
+function renderDesktop(){
+  const svg=document.getElementById("bigFolder").innerHTML;
+  const items=[{id:"about",name:"About",open:()=>{openWin("about","About",ABOUT,{width:360});track("about")}},{id:"semiotics",name:"Semiotics",open:openSemiotics}];
+  center.innerHTML=items.map(f=>`<button class="dfolder" type="button" data-folder="${f.id}">${svg}<span class="lab">${esc(f.name)}</span></button>`).join("");
+  items.forEach(f=>center.querySelector(`[data-folder="${f.id}"]`).addEventListener("click",f.open));
+  placeFolders();
+}
+function placeFolders(){
+  const ws=[desk.querySelector('.win[data-key="intro"]'),desk.querySelector('.win[data-key="opening"]')].filter(Boolean);
+  const bottom=ws.length?Math.max(...ws.map(w=>w.offsetTop+w.offsetHeight)):desk.clientHeight/2-60;
+  center.style.top=Math.min(bottom+40,desk.clientHeight-130)+"px";
+}
+/* centers the quote window and the opening questions as a pair, folders underneath */
+function layoutPair(){
+  const W=desk.clientWidth,H=desk.clientHeight,gap=20;
+  const i=desk.querySelector('.win[data-key="intro"]'),o=desk.querySelector('.win[data-key="opening"]');
+  const ws=[i,o].filter(Boolean);if(!ws.length){placeFolders();return}
+  const total=ws.reduce((a,w)=>a+w.offsetWidth,0)+gap*(ws.length-1);
+  if(total+24<=W){
+    const h=Math.max(...ws.map(w=>w.offsetHeight));const top=Math.max(24,(H-h-140)/2);let left=(W-total)/2;
+    ws.forEach(w=>{w.style.left=left+"px";w.style.top=top+"px";left+=w.offsetWidth+gap});
+  }else{let top=24;ws.forEach(w=>{w.style.left=(W-w.offsetWidth)/2+"px";w.style.top=top+"px";top+=w.offsetHeight+12})}
+  placeFolders();
+}
+function openIntro(){
+  const w=openWin("intro","",`<p class="quote">The new generation does not know l'histoire de la Guinée</p><p class="attr">Words from my father</p>`,{width:350,x:18,y:30,onClose:placeFolders});
+  return w;
+}
+/* a bare #white, #headwrap or #indigo on the link opens that folder straight away */
+function openFromHash(){const id=(location.hash||"").slice(1);const g=GARMENTS.find(x=>x.id===id);if(g){openSemiotics();openGarment(g)}}
+addEventListener("hashchange",openFromHash);
+openIntro();
+renderDesktop();
+openOpening();
+layoutPair();
+addEventListener("resize",()=>placeFolders());
+openFromHash();
+(async()=>{try{
+  if(!window.claude||!window.claude.use)return;
+  const [d,u]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);db=d;
+  if(u){try{uid=await u.id()}catch(e){}try{isOwner=await u.isOwner()}catch(e){}}
+  if(db&&uid){try{const s=await db.doc("responses/"+uid).get();const raw=typeof s.data==="function"?s.data():s.data;const prev=raw?JSON.parse(JSON.stringify(raw)):null;/* saved data arrives read-only, so work on a copy */if(prev){Object.assign(record,prev);record.folders=prev.folders||{}}}catch(e){}}
+  renderDesktop();
+  if(record.opening){const o=desk.querySelector('.win[data-key="opening"]');if(o)o.remove()}
+}catch(e){}})();
+})();
+</script>
+
+</body>
+</html>
